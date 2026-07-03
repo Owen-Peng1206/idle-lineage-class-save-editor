@@ -1,0 +1,42 @@
+name: Sync Submodule and Deploy Pages
+
+on:
+  schedule:
+    # 這裡設定定時觸發，例如每天凌晨 0 點 (UTC 時間)
+    - cron: '30 * * * *'
+  workflow_dispatch:
+    # 允許你在 GitHub 網頁上點擊按鈕手動觸發
+
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 檢出主倉庫程式碼 (使用剛剛設定的 PAT)
+    - name: Checkout main repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.SYNC_TOKEN }}
+        submodules: 'true'
+        fetch-depth: 0
+
+    # 2. 將 Submodule 更新至遠端最新版本
+    - name: Update Submodule to latest remote commit
+      run: |
+        git submodule update --remote --recursive
+
+    # 3. 檢查是否有更新，有的話就 Commit 並 Push
+    - name: Commit and Push if changed
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # 檢查是否有檔案變更（Submodule 指向的 commit 改變算變更）
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Submodule has updates. Committing..."
+          git add .
+          git commit -m "chore: automated submodule sync to latest version"
+          git push
+        else
+          echo "No updates found in submodule."
+        fi
