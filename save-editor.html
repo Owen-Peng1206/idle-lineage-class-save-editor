@@ -1,0 +1,3116 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>放置天堂 - 存檔編輯器</title>
+    <link rel="stylesheet" href="idle-lineage-class/css/tailwind-built.css">
+    <script src="idle-lineage-class/js/00-data.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #090d16 80%, #020617 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #f1f5f9;
+        }
+
+        h1, h2, h3, .font-serif {
+            font-family: 'Cinzel', Georgia, Cambria, "Times New Roman", Times, serif;
+            letter-spacing: 0.05em;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.35);
+        }
+
+        /* Glassmorphic card styling */
+        .card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.35);
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.45);
+            padding: 1.25rem;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 4px 30px rgba(99, 102, 241, 0.06);
+        }
+
+        /* Toggle Switches */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 38px;
+            height: 20px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            transition: .25s ease;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #64748b;
+            transition: .25s ease;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: rgba(217, 119, 6, 0.25);
+            border-color: #d97706;
+        }
+        input:checked + .slider:before {
+            transform: translateX(18px);
+            background-color: #f59e0b;
+            box-shadow: 0 0 6px #f59e0b;
+        }
+
+        /* Tab Layout */
+        .tab-container {
+            display: flex;
+            gap: 0.25rem;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 1px;
+        }
+        .tab-container::-webkit-scrollbar {
+            display: none;
+        }
+        .tab-btn {
+            white-space: nowrap;
+            padding: 0.75rem 1.25rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .tab-btn:hover {
+            color: #94a3b8;
+        }
+        .tab-btn.active {
+            color: #f59e0b;
+            border-bottom-color: #f59e0b;
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Rarity styling overrides */
+        .c-blessed { color: #facc15; text-shadow: 0 0 4px rgba(250, 204, 21, 0.25); }
+        .c-ancient { color: #c084fc; text-shadow: 0 0 4px rgba(192, 132, 252, 0.25); }
+        .c-rare { color: #fb923c; }
+        .c-attr { color: #22d3ee; }
+        .c-anc-bless { color: #e3a625; }
+        .c-eternal    { color: #f43f5e; text-shadow: 0 0 5px rgba(244,63,94,.5); }
+        .c-immortal   { color: #10b981; text-shadow: 0 0 5px rgba(16,185,129,.5); }
+        .c-primordial { color: #0ea5e9; text-shadow: 0 0 5px rgba(14,165,233,.5); }
+        .c-legend { color: #f59e0b !important; font-weight: bold; text-shadow: 0 0 4px rgba(245, 158, 11, 0.5); }
+        .c-sherine { color: #4ade80 !important; font-weight: bold; text-shadow: 0 0 5px rgba(74, 222, 128, 0.4); }
+        .c-cursed { color: #ef4444; text-shadow: 0 0 5px rgba(239,68,68,0.4); }
+        
+        .c-attr-fire1  { color: #fca5a5; } .c-attr-fire3  { color: #f87171; } .c-attr-fire5  { color: #ef4444; }
+        .c-attr-water1 { color: #93c5fd; } .c-attr-water3 { color: #60a5fa; } .c-attr-water5 { color: #3b82f6; }
+        .c-attr-wind1  { color: #86efac; } .c-attr-wind3  { color: #4ade80; } .c-attr-wind5  { color: #22c55e; }
+        .c-attr-earth1 { color: #fcd34d; } .c-attr-earth3 { color: #fbbf24; } .c-attr-earth5 { color: #f59e0b; }
+        .c-attr-glow { text-shadow: 0 0 6px currentColor; }
+
+        @keyframes modalSlideUp {
+            from { transform: translateY(15px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-content {
+            animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        input:focus, select:focus {
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15) !important;
+        }
+
+        #search-results-dropdown, #modal-search-results-dropdown {
+            background-color: #0f172a !important;
+            border: 1px solid rgba(71, 85, 105, 0.8) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 pb-20 md:pb-6">
+
+    <!-- Top Sticky Header -->
+    <header class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between mb-6 pb-4 border-b border-slate-800 gap-4">
+        <div class="flex items-center gap-3">
+            <h1 class="text-xl sm:text-2xl font-bold font-serif text-yellow-500 tracking-wider">放置天堂 存檔編輯器</h1>
+        </div>
+        <div class="flex gap-2 w-full sm:w-auto relative">
+            <label class="flex-1 sm:flex-none px-4 py-2 bg-blue-900 hover:bg-blue-800 border border-blue-700 rounded-lg text-sm text-blue-100 text-center font-bold cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow">
+                <span>載入存檔</span>
+                <input type="file" id="load-file" accept=".json" class="hidden" onchange="loadSaveFile(this.files[0])">
+            </label>
+            <button onclick="exportSave()" class="flex-1 sm:flex-none px-4 py-2 bg-emerald-800 hover:bg-emerald-700 border border-emerald-600 rounded-lg text-sm text-emerald-100 font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow">
+                匯出存檔
+            </button>
+            <div id="browser-load-dropdown-container" class="relative flex-1 sm:flex-none">
+                <button onclick="toggleBrowserLoadDropdown()" class="w-full px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm text-slate-100 font-bold transition-all active:scale-95 flex items-center justify-center gap-1 shadow">
+                    <span>讀取瀏覽器存檔</span>
+                    <span class="text-[10px]">▼</span>
+                </button>
+                <div id="browser-load-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden max-h-96 overflow-y-auto">
+                    <!-- 由 JavaScript 動態填入 -->
+                </div>
+            </div>            
+            <button id="btn-save-to-browser" onclick="saveToBrowser()" class="hidden flex-1 sm:flex-none px-4 py-2 bg-yellow-600 hover:bg-yellow-500 border border-yellow-500 rounded-lg text-sm text-yellow-950 font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow">
+                存回瀏覽器
+            </button>
+        </div>
+    </header>
+
+    <!-- Welcome / Drag-and-Drop Landing Panel -->
+    <div id="welcome-panel" class="max-w-xl mx-auto my-12 p-8 bg-slate-900/60 border border-slate-800/80 rounded-xl text-center space-y-6 backdrop-blur-md shadow-2xl">
+        <div class="w-16 h-16 bg-yellow-500/10 border border-yellow-500/30 rounded-full flex items-center justify-center mx-auto shadow-md animate-pulse">
+            <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+        </div>
+        <div class="space-y-1.5">
+            <h2 class="text-xl font-bold text-yellow-400 font-serif">歡迎使用存檔編輯器</h2>
+            <p class="text-xs text-slate-400">請載入您的遊戲存檔 JSON 檔案以開始修改屬性、裝備或圖鑑。</p>
+        </div>
+        <div class="flex justify-center pt-2">
+            <label class="cursor-pointer group flex flex-col items-center justify-center w-full max-w-sm h-36 border-2 border-dashed border-slate-700 hover:border-yellow-600/50 bg-slate-950/40 hover:bg-slate-950/70 rounded-xl transition-all duration-300">
+                <div class="flex flex-col items-center justify-center p-4">
+                    <svg class="w-8 h-8 text-slate-500 group-hover:text-yellow-500 transition-colors mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    <span class="text-slate-400 group-hover:text-yellow-400 text-xs font-bold transition-colors">選擇檔案 或 拖曳至此</span>
+                    <span class="text-[10px] text-slate-600 mt-1 font-mono">fable5_save_*.json</span>
+                </div>
+                <input type="file" id="load-file-welcome" accept=".json" class="hidden" onchange="loadSaveFile(this.files[0])">
+            </label>
+        </div>
+        
+        <!-- 網頁書籤聯動區域 -->
+        <div id="bookmarklet-instructions" class="border-t border-slate-800/60 pt-4 space-y-3">
+            <p class="text-xs text-slate-400 font-bold">✨ 網頁版免部署直接聯動 (最推薦)：</p>
+            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-left space-y-3 max-w-md mx-auto text-xs">
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    由於瀏覽器安全限制，線上網頁無法直接載入或打開本機 `file:///` 檔案。請依下列步驟進行連線：
+                </p>
+                <ol class="list-decimal pl-4 text-[11px] text-slate-500 space-y-2">
+                    <li>將此按鈕<b>拖曳到您的書籤列</b>（或新增書籤貼上代碼）：
+                        <div class="py-1">
+                            <a id="bookmarklet-btn" href="#" class="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 text-yellow-950 font-bold rounded text-[11px] inline-block shadow transition-all select-none active:scale-95" onclick="alert('請將我拖曳至瀏覽器書籤列，或複製連結網址新增為書籤！'); return false;">
+                                🔗 傳送存檔至編輯器
+                            </a>
+                        </div>
+                    </li>
+                    <li>點選下方按鈕打開遊戲網站：
+                        <div class="py-2 space-y-2">
+                            <div class="flex gap-2 max-w-sm">
+                                <input type="text" id="game-url-input" placeholder="請輸入遊戲網站網址..." value="https://shines871.github.io/idle-lineage-class/" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-yellow-500">
+                                <button onclick="openGameWebsite()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-blue-100 font-bold rounded text-[11px] inline-block shadow transition-all active:scale-95 shrink-0">
+                                    🌐 開啟遊戲網站
+                                </button>
+                            </div>
+                            <p class="text-[10px] text-slate-500 leading-normal">
+                                * 可支援輸入線上網址（如 GitHub Pages）或本機網頁網址（例如 <code>file:///D:/.../index.html</code>）。
+                            </p>
+                        </div>
+                    </li>
+                    <li>在打開的遊戲網頁中，<b>點擊剛才加入的書籤</b>，存檔就會立刻傳送到這裡！</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 網頁連線存檔列表 -->
+        <div id="welcome-browser-saves-section" class="hidden border-t border-slate-800/60 pt-4 space-y-3">
+            <p class="text-xs text-slate-400 font-bold">網頁連線存檔列表：</p>
+            <div id="welcome-browser-saves" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto text-left">
+                <!-- 由 JavaScript 動態填入 -->
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Main Content (Hidden until save loaded) -->
+    <div id="editor-content" class="hidden max-w-7xl mx-auto space-y-6">
+
+        <!-- Character Grid switcher cards -->
+        <div id="char-switcher-panel" class="hidden space-y-3">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1 font-serif">選擇編輯對象</h3>
+            <div id="char-selector-cards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                <!-- Generated dynamically -->
+            </div>
+            <div class="text-[10px] text-slate-500 pl-1">
+                提示：您可以自由切換編輯主角或協力傭兵，隊友與主角共享相同的背包裝備庫與技能編輯功能。
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tab-container">
+            <button onclick="switchTab('tab-char')" id="btn-tab-char" class="tab-btn active">角色與屬性</button>
+            <button onclick="switchTab('tab-equip')" id="btn-tab-equip" class="tab-btn">裝備與背包</button>
+            <button onclick="switchTab('tab-progress')" id="btn-tab-progress" class="tab-btn">冒險進度與圖鑑</button>
+            <button onclick="switchTab('tab-skills')" id="btn-tab-skills" class="tab-btn">技能編輯</button>
+        </div>
+
+        <!-- TAB 1: 角色與屬性 -->
+        <div id="tab-char" class="tab-pane space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Character Info Card -->
+                <div class="card lg:col-span-2 space-y-4">
+                    <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2 flex items-center gap-2">
+                        <span>角色基本資料</span>
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs w-20 shrink-0">職業:</span>
+                                <select id="edit-class" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs cursor-pointer focus:outline-none" onchange="updatePlayer('cls', this.value)">
+                                    <option value="knight">騎士 (knight)</option>
+                                    <option value="mage">法師 (mage)</option>
+                                    <option value="elf">妖精 (elf)</option>
+                                    <option value="dark">黑暗妖精 (dark)</option>
+                                    <option value="illusion">幻術士 (illusion)</option>
+                                    <option value="dragon">龍騎士 (dragon)</option>
+                                    <option value="warrior">戰士 (warrior)</option>
+                                    <option value="royal">王族 (royal)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs w-20 shrink-0">角色名稱:</span>
+                                <input id="edit-name" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none" onchange="updatePlayer('name', this.value)">
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs w-20 shrink-0">等級:</span>
+                                <input id="edit-lv" type="number" min="1" max="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono focus:outline-none text-center" onchange="updatePlayer('lv', parseInt(this.value) || 1)">
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs w-20 shrink-0">累積經驗:</span>
+                                <input id="edit-exp" type="number" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono focus:outline-none" onchange="updatePlayer('exp', parseInt(this.value) || 0)">
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs w-20 shrink-0">擁有金幣:</span>
+                                <input id="edit-gold" type="number" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-yellow-400 font-bold text-xs font-mono focus:outline-none" onchange="updatePlayer('gold', parseInt(this.value) || 0)">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-slate-400 text-xs">血量 (HP):</span>
+                                <div class="flex gap-2">
+                                    <input id="edit-hp" type="number" min="0" placeholder="當前 HP" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono text-center focus:outline-none" onchange="updatePlayer('hp', parseInt(this.value) || 0)">
+                                    <input id="edit-mhp" type="number" min="0" placeholder="最大 HP" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono font-bold text-center focus:outline-none" onchange="updatePlayer('mhp', parseInt(this.value) || 0)">
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-slate-400 text-xs">魔力 (MP):</span>
+                                <div class="flex gap-2">
+                                    <input id="edit-mp" type="number" min="0" placeholder="當前 MP" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono text-center focus:outline-none" onchange="updatePlayer('mp', parseInt(this.value) || 0)">
+                                    <input id="edit-mmp" type="number" min="0" placeholder="最大 MP" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono font-bold text-center focus:outline-none" onchange="updatePlayer('mmp', parseInt(this.value) || 0)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Point status / Allocation Card -->
+                <div class="card space-y-4 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2 flex items-center gap-2">
+                            <span>點數分配狀態</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                            修改該角色的自由配點餘額以及當前已使用萬靈藥的次數。
+                        </p>
+                    </div>
+                    <div class="space-y-4 pt-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-slate-400 text-xs">自由分配點數:</span>
+                            <input id="edit-bonus" type="number" min="0" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-center font-mono text-xs focus:outline-none" onchange="const char = getActiveChar(); if (char) { char.bonus = Math.max(0, parseInt(this.value) || 0); showStatus('已更新自由分配點數', 'success'); }">
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-slate-400 text-xs">萬靈藥使用次數:</span>
+                            <input id="edit-panacea-used" type="number" min="0" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-center font-mono text-xs focus:outline-none" onchange="const char = getActiveChar(); if (char) { char.panaceaUsed = Math.max(0, parseInt(this.value) || 0); showStatus('已更新萬靈藥已使用次數', 'success'); }">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Base Attributes Cards Grid -->
+            <div class="card space-y-4">
+                <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">核心能力屬性面板 (整合基礎、配點、萬靈藥)</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="base-stats-container">
+                    <!-- Automatically populated by JS -->
+                </div>
+            </div>
+
+            <!-- Ally Automated settings (Visible only when editing an Ally) -->
+            <div id="panel-mercenary-settings" class="hidden card space-y-4">
+                <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">協力傭兵戰鬥與自動化設定</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    
+                    <!-- Column 1: Slot and Status -->
+                    <div class="space-y-4 bg-slate-950/40 p-4 rounded-lg border border-slate-800/80">
+                        <h3 class="text-xs font-bold text-slate-300 pb-1.5 border-b border-slate-900">戰鬥位置與生死狀態</h3>
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-slate-400 text-xs">出戰位置 (_slot):</span>
+                            <select id="edit-merc-slot" class="w-32 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs cursor-pointer focus:outline-none" onchange="updateMercSetting('_slot', this.value)">
+                                <option value="3">位置 3 (前/後排)</option>
+                                <option value="4">位置 4 (前/後排)</option>
+                                <option value="5">位置 5 (前/後排)</option>
+                                <option value="none">無 (未出戰)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-slate-400 text-xs">倒地狀態 (_downed):</span>
+                            <select id="edit-merc-downed" class="w-32 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs cursor-pointer focus:outline-none" onchange="updateMercSetting('_downed', this.value === 'true')">
+                                <option value="false">正常 (戰鬥中)</option>
+                                <option value="true">倒地 (需要復活)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-slate-400 text-xs">自動復活冷卻:</span>
+                            <div class="flex items-center gap-1">
+                                <input id="edit-merc-revive-cd" type="number" min="0" class="w-20 bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-white text-center font-mono text-xs focus:outline-none" onchange="updateMercSetting('_reviveCd', Math.max(0, parseInt(this.value) || 0))">
+                                <span class="text-slate-500 text-xs">秒</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Skills Selection -->
+                    <div class="space-y-4 bg-slate-950/40 p-4 rounded-lg border border-slate-800/80">
+                        <h3 class="text-xs font-bold text-slate-300 pb-1.5 border-b border-slate-900">自動戰鬥技能綁定</h3>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-slate-400 text-[10px]">攻擊技能 (_atkSkill):</span>
+                            <select id="edit-merc-atk-skill" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs cursor-pointer focus:outline-none" onchange="updateMercSetting('_atkSkill', this.value)">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-slate-400 text-[10px]">治癒魔法 (_healSkill):</span>
+                            <select id="edit-merc-heal-skill" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs cursor-pointer focus:outline-none" onchange="updateMercSetting('_healSkill', this.value)">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-slate-400 text-[10px]">魂體/屬性轉換 (_convertSkill):</span>
+                            <select id="edit-merc-convert-skill" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-xs cursor-pointer focus:outline-none" onchange="updateMercSetting('_convertSkill', this.value)">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Threshold gates -->
+                    <div class="space-y-3 bg-slate-950/40 p-4 rounded-lg border border-slate-800/80">
+                        <h3 class="text-xs font-bold text-slate-300 pb-1.5 border-b border-slate-900">觸發臨界門檻</h3>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-slate-400 text-xs" title="MP％ 高於此值才施放攻擊技能。0 = 不限。">攻擊施法 MP 門檻:</span>
+                            <div class="flex items-center gap-1">
+                                <input id="edit-merc-cast-mp" type="number" min="0" max="100" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-white text-center font-mono text-xs focus:outline-none" onchange="updateMercSetting('_castMpPct', Math.max(0, Math.min(100, parseInt(this.value) || 0)))">
+                                <span class="text-slate-500 text-[10px]">%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-slate-400 text-xs" title="HP％ 低於此值才施放治癒。">自我治癒 HP 門檻:</span>
+                            <div class="flex items-center gap-1">
+                                <input id="edit-merc-heal-hp" type="number" min="0" max="100" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-white text-center font-mono text-xs focus:outline-none" onchange="updateMercSetting('_healHpPct', Math.max(0, Math.min(100, parseInt(this.value) || 0)))">
+                                <span class="text-slate-500 text-[10px]">%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-slate-400 text-xs" title="HP％ 低於此值時，喝隊長設定的藥水回血。0 = 關閉。">自動喝水 HP 門檻:</span>
+                            <div class="flex items-center gap-1">
+                                <input id="edit-merc-pot-hp" type="number" min="0" max="100" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-white text-center font-mono text-xs focus:outline-none" onchange="updateMercSetting('_potHpPct', Math.max(0, Math.min(100, parseInt(this.value) || 0)))">
+                                <span class="text-slate-500 text-[10px]">%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-slate-400 text-xs" title="HP％ 低於此值時，暫停施放消耗 HP 的技能。0 = 關閉。">停用扣血技 HP 門檻:</span>
+                            <div class="flex items-center gap-1">
+                                <input id="edit-merc-hp-skill" type="number" min="0" max="100" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-0.5 text-white text-center font-mono text-xs focus:outline-none" onchange="updateMercSetting('_hpSkillPct', Math.max(0, Math.min(100, parseInt(this.value) || 0)))">
+                                <span class="text-slate-500 text-[10px]">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 4: Automation & Buffs -->
+                    <div class="space-y-3 bg-slate-950/40 p-4 rounded-lg border border-slate-800/80 md:col-span-3">
+                        <h3 class="text-xs font-bold text-slate-300 pb-1.5 border-b border-slate-900">自動化輔助藥水與卷軸設定 (Config)</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 text-xs pt-1">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">使用藥水種類:</span>
+                                <select id="edit-merc-config-setpot" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white cursor-pointer focus:outline-none" onchange="updateMercConfig('setPot', this.value)">
+                                    <option value="potion_ult">終極治癒藥水 (potion_ult)</option>
+                                    <option value="potion_high">強力治癒藥水 (potion_high)</option>
+                                    <option value="potion_med">治癒藥水 (potion_med)</option>
+                                    <option value="potion_low">體力恢復劑 (potion_low)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">喝水 HP% 門檻:</span>
+                                <input id="edit-merc-config-sethppot" type="number" min="0" max="100" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white text-center font-mono focus:outline-none" onchange="updateMercConfig('setHpPot', this.value.toString())">
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">自動購買藥水:</span>
+                                <label class="switch">
+                                    <input id="edit-merc-config-autobuypot" type="checkbox" onchange="updateMercConfig('setAutoBuyPot', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 border-t border-slate-900/60 pt-2">
+                                <span class="text-slate-400 text-xs">使用加速卷軸 (Haste):</span>
+                                <label class="switch">
+                                    <input id="edit-merc-config-sethaste" type="checkbox" onchange="updateMercConfig('setHaste', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 border-t border-slate-900/60 pt-2">
+                                <span class="text-slate-400 text-xs">自動購買加速卷軸:</span>
+                                <label class="switch">
+                                    <input id="edit-merc-config-autobuyhaste" type="checkbox" onchange="updateMercConfig('setAutoBuyHaste', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 border-t border-slate-900/60 pt-2">
+                                <span class="text-slate-400 text-xs">使用勇氣藥水 (Brave):</span>
+                                <label class="switch">
+                                    <input id="edit-merc-config-setbrave" type="checkbox" onchange="updateMercConfig('setBrave', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 border-t border-slate-900/60 pt-2">
+                                <span class="text-slate-400 text-xs">使用藍色藥水 (Blue):</span>
+                                <label class="switch">
+                                    <input id="edit-merc-config-setblue" type="checkbox" onchange="updateMercConfig('setBlue', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 border-t border-slate-900/60 pt-2">
+                                <span class="text-slate-400 text-xs">使用變身卷軸 (Poly):</span>
+                                <label class="switch">
+                                    <input id="edit-merc-config-setpoly" type="checkbox" onchange="updateMercConfig('setPoly', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 border-t border-slate-900/60 pt-2">
+                                <span class="text-slate-400 text-xs">使用魔法防禦 (Barrier):</span>
+                                <label class="switch">
+                                    <input id="edit-merc-config-setbarrier" type="checkbox" onchange="updateMercConfig('setMagicbarrier', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: 裝備與背包 -->
+        <div id="tab-equip" class="tab-pane hidden space-y-6">
+            <!-- Equipment Slots Grid -->
+            <div class="card space-y-4">
+                <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">當前穿戴裝備</h2>
+                <div id="equipment-slots" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                    <!-- Automatically populated -->
+                </div>
+            </div>
+
+            <!-- Backpack Items -->
+            <div class="card space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 flex-wrap gap-2">
+                    <h2 class="text-lg font-bold font-serif text-yellow-500 flex items-center gap-2">
+                        <span>背包物品欄 (Inventory)</span>
+                    </h2>
+                    <button onclick="showEditItemModal('add_inv')" class="px-4 py-1.5 bg-blue-900 hover:bg-blue-800 border border-blue-700 hover:border-blue-600 rounded-lg text-xs font-bold text-blue-100 shadow active:scale-95 transition-all">+ 新增背包物品</button>
+                </div>
+
+                <!-- Quick Search & Add Form -->
+                <div class="bg-slate-950/40 p-4 rounded-lg border border-slate-800 flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full relative">
+                        <label class="block text-xs text-slate-400 mb-1.5">快捷搜尋並新增物品 (輸入 ID 或關鍵字):</label>
+                        <input id="inv-db-search" type="text" placeholder="例如：屠龍、wpn_、卷軸 等..." oninput="searchItemDb(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs focus:outline-none transition-all" autocomplete="off">
+                        <div id="search-results-dropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 rounded-lg shadow-2xl max-h-60 overflow-y-auto z-40 divide-y divide-slate-800 border border-slate-700">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                    <div class="w-full md:w-24 shrink-0">
+                        <label class="block text-xs text-slate-400 mb-1.5">新增數量:</label>
+                        <input id="search-add-qty" type="number" min="1" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs text-center font-mono focus:outline-none">
+                    </div>
+                    <div class="w-full md:w-24 shrink-0">
+                        <label class="block text-xs text-slate-400 mb-1.5">強化等級:</label>
+                        <input id="search-add-en" type="number" min="0" max="20" value="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs text-center font-mono focus:outline-none">
+                    </div>
+                    <button onclick="addSearchedItemDirectly()" class="w-full md:w-auto px-5 h-[38px] bg-emerald-800 hover:bg-emerald-700 border border-emerald-600 hover:border-emerald-500 text-emerald-100 rounded-lg text-xs font-bold shadow active:scale-95 transition-all flex items-center justify-center whitespace-nowrap">直接新增</button>
+                </div>
+
+                <!-- Responsive list container -->
+                <div id="inventory-table" class="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                    <!-- Automatically populated -->
+                </div>
+            </div>
+
+            <!-- Warehouse Panel -->
+            <div class="card space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-2">
+                    <h2 class="text-lg font-bold font-serif text-yellow-500">個人/共用倉庫 (Warehouse)</h2>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-400 text-xs shrink-0">倉庫金幣:</span>
+                            <input id="edit-wh-gold" type="number" min="0" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-yellow-400 text-xs text-center font-bold font-mono focus:outline-none" onchange="updateWarehouseGold(this.value)">
+                        </div>
+                        <button onclick="showEditItemModal('add_wh')" class="px-4 py-1.5 bg-blue-900 hover:bg-blue-800 border border-blue-700 hover:border-blue-600 rounded-lg text-xs font-bold text-blue-100 shadow active:scale-95 transition-all">+ 新增倉庫物品</button>
+                    </div>
+                </div>
+
+                <!-- Responsive list container -->
+                <div id="warehouse-table" class="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                    <!-- Automatically populated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: 冒險進度與圖鑑 -->
+        <div id="tab-progress" class="tab-pane hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Modes & Settings -->
+                <div class="card space-y-4">
+                    <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">遊戲進度與特殊模式</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">經典模式 (Classic):</span>
+                                <select id="edit-classic-mode" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs cursor-pointer focus:outline-none" onchange="saveData.p.classicMode = this.value === 'true'; showStatus('已更新經典模式狀態', 'success');">
+                                    <option value="false">一般模式</option>
+                                    <option value="true">經典模式</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">傳統模式 (Traditional):</span>
+                                <select id="edit-traditional-mode" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs cursor-pointer focus:outline-none" onchange="saveData.p.traditionalMode = this.value === 'true'; showStatus('已更新傳統模式狀態', 'success');">
+                                    <option value="false">一般規則</option>
+                                    <option value="true">傳統規則</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">妖精屬性:</span>
+                                <select id="edit-elf-ele" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs cursor-pointer focus:outline-none" onchange="saveData.p.elfEle = this.value || null; showStatus('已更新妖精屬性', 'success');">
+                                    <option value="">無</option>
+                                    <option value="fire">火 (Fire)</option>
+                                    <option value="water">水 (Water)</option>
+                                    <option value="wind">風 (Wind)</option>
+                                    <option value="earth">地 (Earth)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">傲慢之塔 (Jenis Beat):</span>
+                                <select id="edit-pride-jenis" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs cursor-pointer focus:outline-none" onchange="saveData.p.prideBeatJenis = this.value === 'true'; showStatus('已更新傲慢之塔女王進度', 'success');">
+                                    <option value="false">未擊敗</option>
+                                    <option value="true">已擊敗</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">50級魔族神殿試煉:</span>
+                                <select id="edit-demon-temple" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs cursor-pointer focus:outline-none" onchange="saveData.p.demonTempleOpen = this.value === 'true'; showStatus('已更新魔族神殿開放進度', 'success');">
+                                    <option value="false">未開放</option>
+                                    <option value="true">已開放</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-slate-400 text-xs">試煉塔階數 (Trial):</span>
+                                <input id="edit-trial-stage" type="number" min="0" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-center text-xs font-mono focus:outline-none" onchange="saveData.p.trialStage = Math.max(0, parseInt(this.value) || 0); showStatus('已更新試煉階段', 'success');">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-800/60 gap-3">
+                        <span class="text-slate-400 text-xs">炎魔名望值 (Flame Affinity):</span>
+                        <input id="edit-flame-affinity" type="number" min="0" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-center text-xs font-mono focus:outline-none" onchange="saveData.p.flameAffinity = Math.max(0, parseInt(this.value) || 0); showStatus('已更新炎魔名望', 'success');">
+                    </div>
+                </div>
+
+                <!-- Shared Dex Unlocks -->
+                <div class="card flex flex-col justify-between space-y-4">
+                    <div>
+                        <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">共用圖鑑解鎖器 (一鍵滿積分)</h2>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                            說明：卡片圖鑑、裝備圖鑑與收集品圖鑑為全角色模式共享。解鎖後將在遊戲中自動轉換為滿積分的金色滿級圖鑑。
+                        </p>
+                    </div>
+
+                    <div class="space-y-3 pt-4">
+                        <button onclick="unlockAllCards()" class="w-full py-3 bg-indigo-950/65 hover:bg-indigo-900/80 border border-indigo-700/80 hover:border-indigo-500 text-indigo-300 rounded-lg font-bold text-xs transition-all active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-md">
+                            ✨ 一鍵滿分「全怪物卡片圖鑑」
+                        </button>
+                        <button onclick="unlockAllEquips()" class="w-full py-3 bg-violet-950/65 hover:bg-violet-900/80 border border-violet-700/80 hover:border-violet-500 text-violet-300 rounded-lg font-bold text-xs transition-all active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-md">
+                            ⚔️ 一鍵解鎖「全裝備收集圖鑑」
+                        </button>
+                        <button onclick="unlockAllMiscs()" class="w-full py-3 bg-fuchsia-950/65 hover:bg-fuchsia-900/80 border border-fuchsia-700/80 hover:border-fuchsia-500 text-fuchsia-300 rounded-lg font-bold text-xs transition-all active:scale-[0.99] flex items-center justify-center gap-1.5 shadow-md">
+                            💎 一鍵解鎖「全收集品圖鑑」
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: 技能編輯 -->
+        <div id="tab-skills" class="tab-pane hidden space-y-6">
+            <div class="card space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 flex-wrap gap-2">
+                    <h2 class="text-lg font-bold font-serif text-yellow-500">技能學習編輯器</h2>
+                    <div class="flex gap-2">
+                        <button onclick="learnAllSkills()" class="px-4 py-1.5 bg-emerald-900 hover:bg-emerald-800 border border-emerald-700 text-emerald-200 rounded-lg text-xs font-bold shadow active:scale-95 transition-all">學習全部可學技能</button>
+                        <button onclick="forgetAllSkills()" class="px-4 py-1.5 bg-red-950 hover:bg-red-900 border border-red-800 text-red-300 rounded-lg text-xs font-bold shadow active:scale-95 transition-all">遺忘全部技能</button>
+                    </div>
+                </div>
+                
+                <div id="skills-container" class="space-y-4">
+                    <!-- Categories of skills generated by JS -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Item Editor Modal -->
+    <div id="item-editor-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-xl p-6 shadow-2xl space-y-5">
+            <h3 id="modal-title" class="text-lg font-bold font-serif text-yellow-500 pb-2 border-b border-slate-800">編輯物品</h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Left Column -->
+                <div class="space-y-3.5">
+                    <div class="relative">
+                        <label class="block text-xs text-slate-400 mb-1">物品 ID (Item ID):</label>
+                        <input id="edit-item-id" type="text" placeholder="例：wpn_dragonslayer" oninput="searchModalItemDb(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs focus:outline-none" autocomplete="off">
+                        <div id="modal-search-results-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-800 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-50 divide-y divide-slate-800 border border-slate-700">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">物品數量 (Count):</label>
+                        <input id="edit-item-cnt" type="number" value="1" min="1" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs font-mono focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">強化等級 (+N):</label>
+                        <input id="edit-item-en" type="number" value="0" min="0" max="20" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs font-mono focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">裝備鎖定狀態:</label>
+                        <select id="edit-item-lock" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none">
+                            <option value="false">未鎖定</option>
+                            <option value="true">🔒 已鎖定 (Locked)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">祝福屬性 (Blessing):</label>
+                        <select id="edit-item-bless" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none">
+                            <option value="">無</option>
+                            <option value="true">祝福的 (Bless)</option>
+                            <option value="cursed">詛咒的 (Cursed)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">遠古屬性 (Ancient):</label>
+                        <select id="edit-item-anc" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none">
+                            <option value="">無</option>
+                            <option value="true">遠古 (Ancient)</option>
+                            <option value="eternal">永恆 (Eternal)</option>
+                            <option value="immortal">不朽 (Immortal)</option>
+                            <option value="primordial">太初 (Primordial)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">屬性詞綴 (Attribute):</label>
+                        <select id="edit-item-attr" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none">
+                            <option value="">無</option>
+                            <option value="fire1">火之 (+1)</option>
+                            <option value="water1">水之 (+1)</option>
+                            <option value="wind1">風之 (+1)</option>
+                            <option value="earth1">地之 (+1)</option>
+                            <option value="fire3">爆炎 (+3)</option>
+                            <option value="water3">海嘯 (+3)</option>
+                            <option value="wind3">暴風 (+3)</option>
+                            <option value="earth3">崩裂 (+3)</option>
+                            <option value="fire5">火靈 (+5)</option>
+                            <option value="water5">水靈 (+5)</option>
+                            <option value="wind5">風靈 (+5)</option>
+                            <option value="earth5">地靈 (+5)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">席琳套裝效果 (Seline Set):</label>
+                        <select id="edit-item-seteff" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none">
+                            <option value="">無</option>
+                            <option value="紅獅">紅獅</option>
+                            <option value="白鳥">白鳥</option>
+                            <option value="鐵衛">鐵衛</option>
+                            <option value="麗人">麗人</option>
+                            <option value="疾風">疾風</option>
+                            <option value="月光">月光</option>
+                            <option value="學徒">學徒</option>
+                            <option value="魔女">魔女</option>
+                            <option value="暗影">暗影</option>
+                            <option value="幻覺">幻覺</option>
+                            <option value="龍血">龍血</option>
+                            <option value="狂怒">狂怒</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex gap-3 pt-4 border-t border-slate-800 mt-4">
+                <button onclick="closeItemEditorModal()" class="px-5 py-2 bg-slate-850 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 text-slate-300 font-bold rounded-lg text-sm transition-all flex-1 active:scale-95">取消</button>
+                <button onclick="confirmSaveItem()" class="px-5 py-2 bg-yellow-600 hover:bg-yellow-500 border border-yellow-500 text-yellow-950 font-bold rounded-lg text-sm transition-all flex-1 active:scale-95 shadow">儲存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Browser Save Target Modal -->
+    <div id="browser-save-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="modal-content w-full max-w-sm bg-slate-900 border border-slate-700/80 rounded-xl p-6 shadow-2xl space-y-4">
+            <h3 class="text-base font-bold font-serif text-yellow-500 pb-2 border-b border-slate-800">選擇存回瀏覽器的目標欄位</h3>
+            <div class="space-y-2">
+                <label class="block text-xs text-slate-400">選擇儲存位置與欄位：</label>
+                <select id="browser-save-target-select" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none">
+                    <!-- 由 JavaScript 動態填入 -->
+                </select>
+            </div>
+            <!-- Footer Actions -->
+            <div class="flex gap-3 pt-4 border-t border-slate-800">
+                <button onclick="closeBrowserSaveModal()" class="px-5 py-2 bg-slate-850 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 text-slate-300 font-bold rounded-lg text-sm transition-all flex-1 active:scale-95">取消</button>
+                <button onclick="confirmSaveToBrowser()" class="px-5 py-2 bg-yellow-600 hover:bg-yellow-500 border border-yellow-500 text-yellow-950 font-bold rounded-lg text-sm transition-all flex-1 active:scale-95 shadow">確定寫入</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ===== LZString Library (MIT, Pieroxy) =====
+    if (typeof LZString === 'undefined') {
+      window.LZString = (function () {
+        var f = String.fromCharCode;
+        var LZString = {
+          compressToUTF16: function (input) { if (input == null) return ""; return LZString._compress(input, 15, function (a) { return f(a + 32); }) + " "; },
+          decompressFromUTF16: function (compressed) { if (compressed == null) return ""; if (compressed == "") return null; return LZString._decompress(compressed.length, 16384, function (index) { return compressed.charCodeAt(index) - 32; }); },
+          _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+            if (uncompressed == null) return "";
+            var i, value, context_dictionary = {}, context_dictionaryToCreate = {}, context_c = "", context_wc = "", context_w = "", context_enlargeIn = 2, context_dictSize = 3, context_numBits = 2, context_data = [], context_data_val = 0, context_data_position = 0, ii;
+            for (ii = 0; ii < uncompressed.length; ii += 1) {
+              context_c = uncompressed.charAt(ii);
+              if (!Object.prototype.hasOwnProperty.call(context_dictionary, context_c)) { context_dictionary[context_c] = context_dictSize++; context_dictionaryToCreate[context_c] = true; }
+              context_wc = context_w + context_c;
+              if (Object.prototype.hasOwnProperty.call(context_dictionary, context_wc)) { context_w = context_wc; } else {
+                if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate, context_w)) {
+                  if (context_w.charCodeAt(0) < 256) {
+                    for (i = 0; i < context_numBits; i++) { context_data_val = (context_data_val << 1); if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } }
+                    value = context_w.charCodeAt(0);
+                    for (i = 0; i < 8; i++) { context_data_val = (context_data_val << 1) | (value & 1); if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } value = value >> 1; }
+                  } else {
+                    value = 1;
+                    for (i = 0; i < context_numBits; i++) { context_data_val = (context_data_val << 1) | value; if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } value = 0; }
+                    value = context_w.charCodeAt(0);
+                    for (i = 0; i < 16; i++) { context_data_val = (context_data_val << 1) | (value & 1); if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } value = value >> 1; }
+                  }
+                  context_enlargeIn--; if (context_enlargeIn == 0) { context_enlargeIn = Math.pow(2, context_numBits); context_numBits++; }
+                  delete context_dictionaryToCreate[context_w];
+                } else {
+                  value = context_dictionary[context_w];
+                  for (i = 0; i < context_numBits; i++) { context_data_val = (context_data_val << 1) | (value & 1); if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } value = value >> 1; }
+                }
+                context_enlargeIn--; if (context_enlargeIn == 0) { context_enlargeIn = Math.pow(2, context_numBits); context_numBits++; }
+                context_dictionary[context_wc] = context_dictSize++; context_w = String(context_c);
+              }
+            }
+            if (context_w !== "") {
+              if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate, context_w)) {
+                if (context_w.charCodeAt(0) < 256) {
+                  for (i = 0; i < context_numBits; i++) { context_data_val = (context_data_val << 1); if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } }
+                  value = context_w.charCodeAt(0);
+                  for (i = 0; i < 8; i++) { context_data_val = (context_data_val << 1) | (value & 1); if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } value = value >> 1; }
+                } else {
+                  value = 1;
+                  for (i = 0; i < context_numBits; i++) { context_data_val = (context_data_val << 1) | value; if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } value = 0; }
+                  value = context_w.charCodeAt(0);
+                  for (i = 0; i < 16; i++) { context_data_val = (context_data_val << 1) | (value & 1); if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } value = value >> 1; }
+                }
+                context_enlargeIn--; if (context_enlargeIn == 0) { context_enlargeIn = Math.pow(2, context_numBits); context_numBits++; }
+              } else {
+                value = context_dictionary[context_w];
+                for (i = 0; i < context_numBits; i++) { context_data_val = (context_data_val << 1) | (value & 1); if (context_data_position == bitsPerChar - 1) { context_data_position = 0; context_data.push(getCharFromInt(context_data_val)); context_data_val = 0; } else { context_data_position++; } value = value >> 1; }
+              }
+              context_enlargeIn--; if (context_enlargeIn == 0) { context_enlargeIn = Math.pow(2, context_numBits); context_numBits++; }
+            }
+            while (true) { context_data_val = (context_data_val << 1); if (context_data_position == bitsPerChar - 1) { context_data.push(getCharFromInt(context_data_val)); break; } else context_data_position++; }
+            return context_data.join('');
+          },
+          _decompress: function (length, resetValue, getNextValue) {
+            var dictionary = [], next, enlargeIn = 4, dictSize = 4, numBits = 3, entry = "", result = [], i, w, bits, resb, maxpower, power, c, data = { val: getNextValue(0), position: resetValue, index: 1 };
+            for (i = 0; i < 3; i += 1) { dictionary[i] = i; }
+            bits = 0; maxpower = Math.pow(2, 2); power = 1;
+            while (power != maxpower) { resb = data.val & data.position; data.position >>= 1; if (data.position == 0) { data.position = resetValue; data.val = getNextValue(data.index++); } bits |= (resb > 0 ? 1 : 0) * power; power <<= 1; }
+            switch (next = bits) {
+              case 0: bits = 0; maxpower = Math.pow(2, 8); power = 1; while (power != maxpower) { resb = data.val & data.position; data.position >>= 1; if (data.position == 0) { data.position = resetValue; data.val = getNextValue(data.index++); } bits |= (resb > 0 ? 1 : 0) * power; power <<= 1; } c = f(bits); break;
+              case 1: bits = 0; maxpower = Math.pow(2, 16); power = 1; while (power != maxpower) { resb = data.val & data.position; data.position >>= 1; if (data.position == 0) { data.position = resetValue; data.val = getNextValue(data.index++); } bits |= (resb > 0 ? 1 : 0) * power; power <<= 1; } c = f(bits); break;
+              case 2: return "";
+            }
+            dictionary[3] = c; w = c; result.push(c);
+            while (true) {
+              if (data.index > length) { return ""; }
+              bits = 0; maxpower = Math.pow(2, numBits); power = 1;
+              while (power != maxpower) { resb = data.val & data.position; data.position >>= 1; if (data.position == 0) { data.position = resetValue; data.val = getNextValue(data.index++); } bits |= (resb > 0 ? 1 : 0) * power; power <<= 1; }
+              switch (c = bits) {
+                case 0: bits = 0; maxpower = Math.pow(2, 8); power = 1; while (power != maxpower) { resb = data.val & data.position; data.position >>= 1; if (data.position == 0) { data.position = resetValue; data.val = getNextValue(data.index++); } bits |= (resb > 0 ? 1 : 0) * power; power <<= 1; } dictionary[dictSize++] = f(bits); c = dictSize - 1; enlargeIn--; break;
+                case 1: bits = 0; maxpower = Math.pow(2, 16); power = 1; while (power != maxpower) { resb = data.val & data.position; data.position >>= 1; if (data.position == 0) { data.position = resetValue; data.val = getNextValue(data.index++); } bits |= (resb > 0 ? 1 : 0) * power; power <<= 1; } dictionary[dictSize++] = f(bits); c = dictSize - 1; enlargeIn--; break;
+                case 2: return result.join('');
+              }
+              if (enlargeIn == 0) { enlargeIn = Math.pow(2, numBits); numBits++; }
+              if (dictionary[c]) { entry = dictionary[c]; } else { if (c === dictSize) { entry = w + w.charAt(0); } else { return null; } }
+              result.push(entry);
+              dictionary[dictSize++] = w + entry.charAt(0); enlargeIn--; w = entry;
+              if (enlargeIn == 0) { enlargeIn = Math.pow(2, numBits); numBits++; }
+            }
+          }
+        };
+        return LZString;
+      })();
+    }
+
+    // ===== Save Format Functions =====
+    if (typeof _SAVE_SALT === 'undefined') {
+      window._SAVE_SALT = 'fb5#9c3a7e1d-save-integrity-salt-do-not-edit#a1b2c3';
+    }
+
+    if (typeof _seedHash === 'undefined') {
+      window._seedHash = function (str) {
+        str = String(str); let h = 1779033703 ^ str.length;
+        for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+        h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909);
+        return (h ^ (h >>> 16)) >>> 0;
+      };
+    }
+
+    if (typeof _signSave === 'undefined') {
+      window._signSave = function (s) {
+        let a = _seedHash(_SAVE_SALT + '::' + s);
+        let b = _seedHash(s + '::' + _SAVE_SALT + '::' + a);
+        return (a >>> 0).toString(36) + '.' + (b >>> 0).toString(36) + '.' + (s.length).toString(36);
+      };
+    }
+
+    if (typeof _saveWrap === 'undefined') {
+      window._saveWrap = function (payloadStr) {
+          return 'SIG1:' + _signSave(payloadStr) + ':' + payloadStr;
+      };
+    }
+
+    if (typeof _saveUnwrap === 'undefined') {
+      window._saveUnwrap = function (raw) {
+        if (raw == null) return { payload: null, signed: false, ok: true };
+        if (String(raw).slice(0, 5) === 'SIG1:') {
+          let rest = raw.slice(5), i = rest.indexOf(':');
+          if (i < 0) return { payload: raw, signed: true, ok: false };
+          let sig = rest.slice(0, i), payload = rest.slice(i + 1);
+          return { payload: payload, signed: true, ok: (_signSave(payload) === sig) };
+        }
+        return { payload: raw, signed: false, ok: true };
+      };
+    }
+
+    // ===== Combined Item Database Helper =====
+    const itemDb = {};
+    function initItemDb() {
+        Object.assign(itemDb, EDITOR_ITEMS);
+        if (typeof DB !== 'undefined' && DB.items) {
+            Object.assign(itemDb, DB.items);
+        }
+    }
+
+    // ===== Search & Suggestion Helpers =====
+    let selectedSearchItem = null;
+    function searchItemDb(val) {
+        const dropdown = document.getElementById('search-results-dropdown');
+        if (!dropdown) return;
+        val = val.trim().toLowerCase();
+        if (!val) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+
+        const results = [];
+        for (const [id, item] of Object.entries(itemDb)) {
+            if (id.toLowerCase().includes(val) || (item.n && item.n.toLowerCase().includes(val))) {
+                results.push({ id, ...item });
+                if (results.length >= 12) break;
+            }
+        }
+
+        if (results.length === 0) {
+            dropdown.innerHTML = '<div class="p-2.5 text-slate-500 text-xs text-center bg-slate-900">無符合的物品</div>';
+        } else {
+            dropdown.innerHTML = results.map(item => {
+                const typeBadge = getItemTypeBadge(item.id);
+                return `
+                    <div onclick="selectSearchItem('${item.id}', '${item.n}')" class="p-2 bg-slate-900 hover:bg-slate-800 cursor-pointer text-xs flex justify-between items-center transition-colors border-b border-slate-800/60 last:border-0">
+                        <div class="flex items-center gap-2">
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${typeBadge.color}">${typeBadge.text}</span>
+                            <span class="text-slate-100 font-bold">${item.n}</span>
+                        </div>
+                        <span class="font-mono text-slate-500 text-[10px]">${item.id}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        dropdown.classList.remove('hidden');
+    }
+
+    function selectSearchItem(id, name) {
+        document.getElementById('inv-db-search').value = name;
+        selectedSearchItem = id;
+        document.getElementById('search-results-dropdown').classList.add('hidden');
+    }
+
+    function addSearchedItemDirectly() {
+        if (!saveData) {
+            showStatus('請先載入存檔。', 'warning');
+            return;
+        }
+        const char = getActiveChar();
+        if (!char) return;
+
+        const itemId = selectedSearchItem || document.getElementById('inv-db-search').value.trim();
+        if (!itemId) {
+            showStatus('請選擇或輸入物品 ID', 'warning');
+            return;
+        }
+
+        const qty = Math.max(1, parseInt(document.getElementById('search-add-qty').value) || 1);
+        const en = Math.max(0, parseInt(document.getElementById('search-add-en').value) || 0);
+
+        const item = { id: itemId, cnt: qty };
+        if (en > 0) item.en = en;
+        item.uid = genUid();
+
+        if (!char.inv) char.inv = [];
+        char.inv.push(item);
+        selectedSearchItem = null;
+        document.getElementById('inv-db-search').value = '';
+        renderEditor();
+        showStatus(`已直接新增物品：${itemDb[itemId]?.n || itemId}`, 'success');
+    }
+
+    function searchModalItemDb(val) {
+        const dropdown = document.getElementById('modal-search-results-dropdown');
+        if (!dropdown) return;
+        val = val.trim().toLowerCase();
+        if (!val) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+
+        const results = [];
+        for (const [id, item] of Object.entries(itemDb)) {
+            if (id.toLowerCase().includes(val) || (item.n && item.n.toLowerCase().includes(val))) {
+                results.push({ id, ...item });
+                if (results.length >= 10) break;
+            }
+        }
+
+        if (results.length === 0) {
+            dropdown.innerHTML = '<div class="p-2.5 text-slate-500 text-xs text-center bg-slate-900">無符合的物品</div>';
+        } else {
+            dropdown.innerHTML = results.map(item => {
+                const typeBadge = getItemTypeBadge(item.id);
+                return `
+                    <div onclick="selectModalSearchItem('${item.id}')" class="p-2 bg-slate-900 hover:bg-slate-800 cursor-pointer text-xs flex justify-between items-center transition-colors border-b border-slate-800/60 last:border-0">
+                        <div class="flex items-center gap-2">
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold border ${typeBadge.color}">${typeBadge.text}</span>
+                            <span class="text-slate-100 font-bold">${item.n}</span>
+                        </div>
+                        <span class="font-mono text-slate-500 text-[10px]">${item.id}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        dropdown.classList.remove('hidden');
+    }
+
+    function selectModalSearchItem(id) {
+        document.getElementById('edit-item-id').value = id;
+        document.getElementById('modal-search-results-dropdown').classList.add('hidden');
+    }
+
+    // ===== Minimal Item Database (subset for lookups) =====
+    const EDITOR_ITEMS = {
+        "wpn_alien": { n: "亞連", type: "wpn" },
+        "wpn_katana": { n: "武士刀", type: "wpn" },
+        "wpn_longsword": { n: "長劍", type: "wpn" },
+        "wpn_dragonslayer": { n: "屠龍劍", type: "wpn", legend: true },
+        "wpn_2hsword": { n: "雙手劍", type: "wpn" },
+        "wpn_official_2h": { n: "武官雙手劍", type: "wpn" },
+        "wpn_battleaxe": { n: "戰斧", type: "wpn" },
+        "wpn_damascus": { n: "大馬士革刀", type: "wpn" },
+        "arm_iron_helm": { n: "鐵頭盔", type: "arm", slot: "helm", ac: 5 },
+        "arm_plate_armor": { n: "板甲", type: "arm", slot: "armor", ac: 12 },
+        "shd_round_shield": { n: "圓盾", type: "arm", slot: "shield", ac: 8 },
+        "acc_gold_ring": { n: "金戒指", type: "acc", slot: "ring" },
+        "potion_heal": { n: "紅色藥水", type: "consumable" },
+        "potion_strong": { n: "橙色藥水", type: "consumable" },
+        "scroll_teleport": { n: "瞬間移動卷軸", type: "consumable" }
+    };
+
+    // ===== Equipment Slot Definitions =====
+    const EQUIPMENT_SLOTS = [
+        { id: 'wpn', name: '武器' },
+        { id: 'helm', name: '頭盔' },
+        { id: 'armor', name: '盔甲' },
+        { id: 'shield', name: '副手' },
+        { id: 'cloak', name: '斗篷' },
+        { id: 'tshirt', name: 'T 恤' },
+        { id: 'gloves', name: '手套' },
+        { id: 'boots', name: '長靴' },
+        { id: 'amulet', name: '項鍊' },
+        { id: 'ear1', name: '耳環 1' },
+        { id: 'ear2', name: '耳環 2' },
+        { id: 'ring1', name: '戒指 1' },
+        { id: 'ring2', name: '戒指 2' },
+        { id: 'ring3', name: '戒指 3' },
+        { id: 'ring4', name: '戒指 4' },
+        { id: 'belt', name: '腰帶' },
+        { id: 'pet', name: '寵物裝備' },
+        { id: 'doll', name: '魔法娃娃' },
+        { id: 'arrow', name: '箭矢' }
+    ];
+
+    // ===== Global State =====
+    let saveData = null;
+    let editingContext = null;
+
+    // Helper to generate UID
+    function genUid() {
+        return Math.random().toString(36).substring(2, 11);
+    }
+
+    // Custom formatting helpers matching game's visual style
+    function ancName(anc) {
+        if (!anc) return '';
+        return ({ eternal: '永恆', immortal: '不朽', primordial: '太初' })[anc] || '遠古';
+    }
+    function ancColorClass(anc) {
+        return ({ eternal: 'c-eternal', immortal: 'c-immortal', primordial: 'c-primordial' })[anc] || 'c-ancient';
+    }
+    function blessName(bless) { return !bless ? '' : (bless === 'cursed' ? '詛咒的' : '祝福的'); }
+    function blessColorClass(bless) { return (bless === 'cursed') ? 'c-cursed' : 'c-blessed'; }
+    
+    const ATTR_AFFIX_LOCAL = {
+        fire1:  { n: '火之' }, water1: { n: '水之' }, wind1:  { n: '風之' }, earth1: { n: '地之' },
+        fire3:  { n: '爆炎' }, water3: { n: '海嘯' }, wind3:  { n: '暴風' }, earth3: { n: '崩裂' },
+        fire5:  { n: '火靈' }, water5: { n: '水靈' }, wind5:  { n: '風靈' }, earth5: { n: '地靈' }
+    };
+    
+    function getItemColorLocal(item) {
+        let d = itemDb[item.id];
+        if (d && d.legend) return 'c-legend';
+        if (item.seteff) return 'c-sherine';
+        if (item.bless) return blessColorClass(item.bless);
+        if (d && d.isB) return 'c-blessed';
+        if (d && d.isC) return 'c-cursed';
+        return d.c || 'text-white';
+    }
+
+    function getItemFullNameLocal(item) {
+        let d = itemDb[item.id];
+        if (!d) return `<span class="text-red-400 font-bold">${item.id} (未知物品)</span>`;
+        let segs = '';
+        let aff = (typeof item.attr === 'string' && ATTR_AFFIX_LOCAL[item.attr]) ? ATTR_AFFIX_LOCAL[item.attr] : null;
+        if (aff) {
+            let acls = 'c-attr-' + item.attr + (item.attr.charAt(item.attr.length - 1) === '5' ? ' c-attr-glow' : '');
+            segs += `<span class="${acls}">${aff.n}</span> `;
+        }
+        if (item.anc) segs += `<span class="${ancColorClass(item.anc)}">${ancName(item.anc)}</span> `;
+        if (item.bless) segs += `<span class="${blessColorClass(item.bless)}">${blessName(item.bless)}</span> `;
+        
+        let en = (item.en > 0) ? (`+${item.en} `) : "";
+        let cnt = item.cnt > 1 ? ` (${item.cnt})` : "";
+        let setPrefix = item.seteff ? item.seteff.slice(0, 2) : "";
+        return `${segs}<span class="${getItemColorLocal(item)}">${en}${setPrefix}${d.n}${cnt}</span>`;
+    }
+
+    // ===== Tab Switching System =====
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        const target = document.getElementById(tabId);
+        if (target) target.classList.remove('hidden');
+
+        const tabs = ['tab-char', 'tab-equip', 'tab-progress', 'tab-skills'];
+        tabs.forEach(t => {
+            const btn = document.getElementById('btn-' + t);
+            if (btn) {
+                if (t === tabId) {
+                    btn.className = "tab-btn active";
+                } else {
+                    btn.className = "tab-btn";
+                }
+            }
+        });
+    }
+
+    // ===== Load Save File =====
+    async function loadSaveFile(file) {
+        if (!file) return;
+
+        try {
+            let text = await file.text();
+            
+            // Clean BOM and leading/trailing newlines
+            if (text.charCodeAt(0) === 0xFEFF) {
+                text = text.slice(1);
+            }
+            text = text.replace(/^[\r\n\s]+/, '').replace(/[\r\n]+$/, '');
+
+            let payload;
+
+            if (text.startsWith('LZ1:')) {
+                try {
+                    payload = LZString.decompressFromUTF16(text.slice(4));
+                } catch(e) {
+                    console.warn('Failed to decompress LZ1, treating as plain text:', e);
+                    payload = text;
+                }
+
+                if (payload.startsWith('SIG1:')) {
+                    let unwrapped = _saveUnwrap(payload);
+                    if (unwrapped.signed && !unwrapped.ok) {
+                        showStatus('存檔完整性校驗未通過，可能已被竄改。', 'error');
+                        return;
+                    }
+                    payload = unwrapped.payload;
+                }
+            } else if (text.startsWith('SIG1:')) {
+                let unwrapped = _saveUnwrap(text);
+                if (unwrapped.signed && !unwrapped.ok) {
+                    showStatus('存檔完整性校驗未通過，可能已被竄改。', 'error');
+                    return;
+                }
+                payload = unwrapped.payload;
+            } else {
+                payload = text;
+            }
+
+            let data;
+            try {
+                data = JSON.parse(payload);
+            } catch(e) {
+                showStatus('匯入失敗：檔案不是有效的存檔（JSON 解析錯誤）。', 'error');
+                return;
+            }
+
+            if (!data.p || !data.p.cls) {
+                showStatus('匯入失敗：檔案內容不是有效的放置天堂存檔。', 'error');
+                return;
+            }
+
+            // Initialize warehouse if missing
+            if (!data.wh) {
+                data.wh = { items: [], gold: 0 };
+            }
+
+            // Generate UIDs for missing items in main player, allies, and warehouse
+            const ensureUids = (item) => {
+                if (item && !item.uid) {
+                    item.uid = genUid();
+                }
+            };
+            if (data.p.inv && Array.isArray(data.p.inv)) {
+                data.p.inv.forEach(ensureUids);
+            }
+            if (data.p.eq) {
+                Object.values(data.p.eq).forEach(ensureUids);
+            }
+            if (data.p.allies && Array.isArray(data.p.allies)) {
+                data.p.allies.forEach(ally => {
+                    if (ally) {
+                        if (ally.inv && Array.isArray(ally.inv)) ally.inv.forEach(ensureUids);
+                        if (ally.eq) Object.values(ally.eq).forEach(ensureUids);
+                    }
+                });
+            }
+            if (data.wh && data.wh.items && Array.isArray(data.wh.items)) {
+                data.wh.items.forEach(ensureUids);
+            }
+
+            saveData = data;
+            activeCharIndex = -1; // Reset to main player
+            
+            // Show character switcher panel
+            const switcher = document.getElementById('char-switcher-panel');
+            if (switcher) switcher.classList.remove('hidden');
+            
+            // Toggle Editor Content and Welcome views
+            const editorContent = document.getElementById('editor-content');
+            if (editorContent) editorContent.classList.remove('hidden');
+            const welcome = document.getElementById('welcome-panel');
+            if (welcome) welcome.classList.add('hidden');
+            
+            populateActiveCharSelect();
+            renderEditor();
+            switchTab('tab-char');
+            showStatus('存檔載入成功！', 'success');
+
+        } catch (e) {
+            console.error('Error loading save file:', e);
+            showStatus('載入存檔時發生錯誤：' + e.message, 'error');
+        }
+    }
+
+    // ===== Export Save File =====
+    function exportSave() {
+        if (!saveData || !saveData.p) {
+            showStatus('沒有可匯出的存檔。請先載入一個存檔。', 'warning');
+            return;
+        }
+
+        try {
+            const validationError = validateSaveData();
+            if (validationError) {
+                showStatus('匯出失敗：' + validationError, 'error');
+                return;
+            }
+
+            let jsonStr = JSON.stringify(saveData);
+            let signed = _saveWrap(jsonStr);
+
+            const blob = new Blob([signed], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fable5_save_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+            const verification = _saveUnwrap(signed);
+            if (verification.signed && !verification.ok) {
+                showStatus('匯出成功，但簽章驗證失敗（可能影響遊戲匯入）。', 'warning');
+            } else {
+                showStatus('存檔已匯出！', 'success');
+            }
+
+        } catch (e) {
+            console.error('Error exporting save:', e);
+            showStatus('匯出存檔時發生錯誤：' + e.message, 'error');
+        }
+    }
+
+    // ===== Validate Save Data =====
+    // ===== Active Character Switcher =====
+    let activeCharIndex = -1; // -1 for player, >= 0 for allies
+    
+    function getActiveChar() {
+        if (!saveData) return null;
+        if (activeCharIndex === -1) {
+            return saveData.p;
+        } else {
+            if (saveData.p.allies && saveData.p.allies[activeCharIndex]) {
+                return saveData.p.allies[activeCharIndex];
+            }
+            return saveData.p;
+        }
+    }
+    
+    function getClassName(cls) {
+        const names = {
+            knight: '騎士',
+            mage: '法師',
+            elf: '妖精',
+            dark: '黑暗妖精',
+            illusion: '幻術士',
+            dragon: '龍騎士',
+            warrior: '戰士',
+            royal: '王族'
+        };
+        return names[cls] || cls || '未知職業';
+    }
+
+    function populateActiveCharSelect() {
+        const container = document.getElementById('char-selector-cards');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!saveData || !saveData.p) {
+            container.innerHTML = '<div class="text-slate-500 text-sm p-4">未載入存檔</div>';
+            return;
+        }
+
+        const chars = [
+            { index: -1, data: saveData.p, role: '主角', isAlly: false }
+        ];
+        if (saveData.p.allies && Array.isArray(saveData.p.allies)) {
+            saveData.p.allies.forEach((ally, index) => {
+                chars.push({ index: index, data: ally, role: `隊友 ${index + 1}`, isAlly: true });
+            });
+        }
+
+        chars.forEach(c => {
+            const isActive = activeCharIndex === c.index;
+            const name = c.data.name || '未命名';
+            const cls = c.data.cls || 'knight';
+            const clsName = getClassName(cls);
+            const lv = c.data.lv || 1;
+            
+            // Class badge style/color
+            let classColor = 'bg-slate-700 text-slate-200';
+            let classInitial = '未';
+            switch(cls) {
+                case 'knight': classColor = 'bg-blue-950/70 border-blue-600 text-blue-300'; classInitial = '騎'; break;
+                case 'mage': classColor = 'bg-purple-950/70 border-purple-600 text-purple-300'; classInitial = '法'; break;
+                case 'elf': classColor = 'bg-emerald-950/70 border-emerald-600 text-emerald-300'; classInitial = '妖'; break;
+                case 'dark': classColor = 'bg-zinc-950/70 border-zinc-600 text-zinc-300'; classInitial = '暗'; break;
+                case 'illusion': classColor = 'bg-pink-950/70 border-pink-600 text-pink-300'; classInitial = '幻'; break;
+                case 'dragon': classColor = 'bg-red-950/70 border-red-600 text-red-300'; classInitial = '龍'; break;
+                case 'warrior': classColor = 'bg-amber-950/70 border-amber-600 text-amber-300'; classInitial = '戰'; break;
+                case 'royal': classColor = 'bg-yellow-950/70 border-yellow-600 text-yellow-300'; classInitial = '王'; break;
+            }
+
+            let statusBadge = '';
+            if (c.isAlly) {
+                const slotText = c.data._slot && c.data._slot !== 'none' ? `位置 ${c.data._slot}` : '未出戰';
+                const isDowned = c.data._downed;
+                statusBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${isDowned ? 'bg-red-950/60 text-red-300 border border-red-900/50' : (c.data._slot && c.data._slot !== 'none' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-900/50' : 'bg-slate-900 text-slate-500 border border-slate-800')}">${slotText}${isDowned ? ' (倒地)' : ''}</span>`;
+            } else {
+                statusBadge = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-yellow-950/60 text-yellow-300 border border-yellow-900/50">主角</span>`;
+            }
+
+            const card = document.createElement('div');
+            card.className = `cursor-pointer p-3 rounded-xl border transition-all flex items-center gap-3 select-none ${isActive ? 'bg-slate-900/90 border-yellow-500 shadow-md shadow-yellow-500/10 scale-[1.01]' : 'bg-slate-950/40 border-slate-800 hover:bg-slate-900/50 hover:border-slate-700'}`;
+            card.onclick = () => changeActiveChar(c.index);
+
+            card.innerHTML = `
+                <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm border ${classColor} shrink-0">
+                    ${classInitial}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold truncate text-xs text-white">${name}</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
+                        <span>${clsName}</span>
+                        <span class="font-mono text-yellow-400 font-bold">Lv.${lv}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function changeActiveChar(val) {
+        activeCharIndex = parseInt(val);
+        renderEditor();
+        showStatus(`已切換編輯角色`, 'success');
+    }
+
+    function updateMercSetting(key, val) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char || activeCharIndex < 0) return;
+        char[key] = val;
+        if (key === '_slot') {
+            populateActiveCharSelect();
+        }
+        showStatus(`已更新傭兵設定`, 'success');
+    }
+
+    function updateMercConfig(key, val) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char || activeCharIndex < 0) return;
+        if (!char.config) char.config = {};
+        char.config[key] = val;
+        showStatus(`已更新傭兵自動化設定`, 'success');
+    }
+
+    function populateMercSkillDropdowns(ally) {
+        const skills = ally.skills || [];
+        const learnedSkills = [{ id: '', name: '無 (普攻)' }];
+        
+        if (typeof DB !== 'undefined' && DB.skills) {
+            for (const id of skills) {
+                const sk = DB.skills[id];
+                if (sk) {
+                    learnedSkills.push({ id: id, name: sk.n || id });
+                }
+            }
+        } else {
+            for (const id of skills) {
+                learnedSkills.push({ id: id, name: id });
+            }
+        }
+
+        const populateSelect = (selectId, value) => {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            select.innerHTML = '';
+            learnedSkills.forEach(sk => {
+                const option = document.createElement('option');
+                option.value = sk.id;
+                option.textContent = sk.name;
+                select.appendChild(option);
+            });
+            select.value = value || '';
+        };
+
+        populateSelect('edit-merc-atk-skill', ally._atkSkill);
+        populateSelect('edit-merc-heal-skill', ally._healSkill);
+        populateSelect('edit-merc-convert-skill', ally._convertSkill);
+    }
+
+    function updatePlayer(key, val) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char) return;
+        char[key] = val;
+        
+        if (key === 'name' || key === 'cls') {
+            populateActiveCharSelect();
+        }
+        showStatus(`已更新屬性 ${key} 為 ${val}`, 'success');
+    }
+
+    function updateBaseStat(stat, val) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char || !char.base) return;
+        char.base[stat] = Math.max(0, val);
+        showStatus(`已更新基礎屬性 ${stat} 為 ${val}`, 'success');
+    }
+
+    // ===== Validate Save Data =====
+    function validateSaveData() {
+        const validClasses = ['knight', 'mage', 'elf', 'dark', 'illusion', 'dragon', 'warrior', 'royal'];
+
+        const validateChar = (char, prefix) => {
+            if (!char.cls) return `${prefix}缺少職業 (cls)`;
+            if (!validClasses.includes(char.cls)) {
+                return `${prefix}無效的職業：${char.cls}`;
+            }
+            if (char.eq) {
+                for (const slot of EQUIPMENT_SLOTS) {
+                    const item = char.eq[slot.id];
+                    if (item && typeof item !== 'object') {
+                        return `${prefix}裝備欄位 ${slot.name} 格式錯誤`;
+                    }
+                }
+            }
+            if (char.inv) {
+                for (let i = 0; i < char.inv.length; i++) {
+                    const item = char.inv[i];
+                    if (!item.id || typeof item.cnt !== 'number') {
+                        return `${prefix}物品欄第 ${i + 1} 項格式錯誤`;
+                    }
+                }
+            }
+            return null;
+        };
+
+        let err = validateChar(saveData.p, '主角');
+        if (err) return err;
+
+        if (saveData.p.allies && Array.isArray(saveData.p.allies)) {
+            for (let idx = 0; idx < saveData.p.allies.length; idx++) {
+                err = validateChar(saveData.p.allies[idx], `隊友 ${idx + 1}`);
+                if (err) return err;
+            }
+        }
+
+        if (saveData.wh && saveData.wh.items) {
+            for (let i = 0; i < saveData.wh.items.length; i++) {
+                const item = saveData.wh.items[i];
+                if (!item.id || typeof item.cnt !== 'number') {
+                    return `倉庫第 ${i + 1} 項格式錯誤`;
+                }
+            }
+        }
+
+        for (const [key, value] of Object.entries(saveData.p.buffs || {})) {
+            if (typeof value !== 'number' || value < 0) {
+                return `Buff ${key} 值無效：${value}`;
+            }
+        }
+
+        return null;
+    }
+
+    function renderEditor() {
+        if (!saveData) return;
+
+        const player = getActiveChar();
+        const mainPlayer = saveData.p;
+
+        document.getElementById('edit-class').value = player.cls || '';
+        document.getElementById('edit-name').value = player.name || '';
+        document.getElementById('edit-lv').value = player.lv || 1;
+        document.getElementById('edit-exp').value = player.exp || 0;
+        document.getElementById('edit-gold').value = player.gold || 0;
+        document.getElementById('edit-hp').value = player.hp || 0;
+        document.getElementById('edit-mhp').value = player.mhp || 0;
+        document.getElementById('edit-mp').value = player.mp || 0;
+        document.getElementById('edit-mmp').value = player.mmp || 0;
+
+        renderBaseStats();
+        
+        document.getElementById('edit-bonus').value = player.bonus || 0;
+        document.getElementById('edit-panacea-used').value = player.panaceaUsed || 0;
+
+        // Global settings always from mainPlayer
+        document.getElementById('edit-classic-mode').value = mainPlayer.classicMode ? 'true' : 'false';
+        document.getElementById('edit-traditional-mode').value = mainPlayer.traditionalMode ? 'true' : 'false';
+        document.getElementById('edit-elf-ele').value = mainPlayer.elfEle || '';
+        document.getElementById('edit-pride-jenis').value = mainPlayer.prideBeatJenis ? 'true' : 'false';
+        document.getElementById('edit-demon-temple').value = mainPlayer.demonTempleOpen ? 'true' : 'false';
+        document.getElementById('edit-trial-stage').value = mainPlayer.trialStage || 0;
+        document.getElementById('edit-flame-affinity').value = mainPlayer.flameAffinity || 0;
+
+        // Mercenary Settings Panel Visibility & Data
+        const mercPanel = document.getElementById('panel-mercenary-settings');
+        if (activeCharIndex >= 0) {
+            if (mercPanel) {
+                mercPanel.classList.remove('hidden');
+                
+                document.getElementById('edit-merc-slot').value = player._slot || 'none';
+                document.getElementById('edit-merc-downed').value = player._downed ? 'true' : 'false';
+                document.getElementById('edit-merc-revive-cd').value = player._reviveCd || 0;
+                
+                populateMercSkillDropdowns(player);
+                
+                document.getElementById('edit-merc-cast-mp').value = player._castMpPct !== undefined ? player._castMpPct : 0;
+                document.getElementById('edit-merc-heal-hp').value = player._healHpPct !== undefined ? player._healHpPct : 70;
+                document.getElementById('edit-merc-pot-hp').value = player._potHpPct !== undefined ? player._potHpPct : (player._hpSafePct || 0);
+                document.getElementById('edit-merc-hp-skill').value = player._hpSkillPct !== undefined ? player._hpSkillPct : (player._hpSafePct || 0);
+
+                // Bind Automated config settings
+                const cfg = player.config || {};
+                document.getElementById('edit-merc-config-setpot').value = cfg.setPot || 'potion_low';
+                document.getElementById('edit-merc-config-sethppot').value = cfg.setHpPot || '80';
+                document.getElementById('edit-merc-config-autobuypot').checked = !!cfg.setAutoBuyPot;
+                document.getElementById('edit-merc-config-sethaste').checked = !!cfg.setHaste;
+                document.getElementById('edit-merc-config-autobuyhaste').checked = !!cfg.setAutoBuyHaste;
+                document.getElementById('edit-merc-config-setbrave').checked = !!cfg.setBrave;
+                document.getElementById('edit-merc-config-setblue').checked = !!cfg.setBlue;
+                document.getElementById('edit-merc-config-setpoly').checked = !!cfg.setPoly;
+                document.getElementById('edit-merc-config-setbarrier').checked = !!cfg.setMagicbarrier;
+            }
+        } else {
+            if (mercPanel) mercPanel.classList.add('hidden');
+        }
+
+        renderSkillsEditor();
+        renderEquipmentSlots();
+        renderInventory();
+        renderWarehouse();
+    }
+    function renderBaseStats() {
+        const container = document.getElementById('base-stats-container');
+        const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+        const statNames = { str: '力量', dex: '敏捷', con: '體質', int: '智力', wis: '精神', cha: '魅力' };
+        const char = getActiveChar();
+        if (!char) return;
+
+        if (!char.alloc) char.alloc = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+        if (!char.panacea) char.panacea = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+        if (!char.base) char.base = { str:10, dex:10, con:10, int:10, wis:10, cha:10 };
+
+        container.innerHTML = '';
+        for (const stat of stats) {
+            const baseVal = char.base[stat] || 0;
+            const allocVal = char.alloc[stat] || 0;
+            const panaVal = char.panacea[stat] || 0;
+            const total = baseVal + allocVal + panaVal;
+
+            const div = document.createElement('div');
+            div.className = 'bg-slate-950/40 p-4 rounded-xl border border-slate-800/80 space-y-3';
+            div.innerHTML = `
+                <div class="flex items-center justify-between border-b border-slate-900 pb-1.5">
+                    <span class="text-slate-300 font-bold font-serif text-xs">${statNames[stat]} (${stat.toUpperCase()})</span>
+                    <span class="text-xs font-bold font-mono text-yellow-400" id="edit-total-${stat}">${total}</span>
+                </div>
+                
+                <!-- Base -->
+                <div class="flex items-center justify-between gap-2 text-[10px]">
+                    <span class="text-slate-500 w-12">基礎 (Base)</span>
+                    <div class="flex items-center gap-1.5 flex-1 justify-end">
+                        <button onclick="adjustBaseStat('${stat}', -1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">-</button>
+                        <input id="edit-base-${stat}" type="number" min="0" max="999" value="${baseVal}"
+                               class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center font-mono text-[10px] focus:outline-none"
+                               onchange="updateBaseStatLocal('${stat}', parseInt(this.value) || 0)">
+                        <button onclick="adjustBaseStat('${stat}', 1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">+</button>
+                    </div>
+                </div>
+
+                <!-- Alloc -->
+                <div class="flex items-center justify-between gap-2 text-[10px]">
+                    <span class="text-slate-500 w-12">配點 (Alloc)</span>
+                    <div class="flex items-center gap-1.5 flex-1 justify-end">
+                        <button onclick="adjustAllocStat('${stat}', -1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">-</button>
+                        <input id="edit-alloc-${stat}" type="number" min="0" value="${allocVal}"
+                               class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center font-mono text-[10px] focus:outline-none"
+                               onchange="updateAllocStatLocal('${stat}', parseInt(this.value) || 0)">
+                        <button onclick="adjustAllocStat('${stat}', 1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">+</button>
+                    </div>
+                </div>
+
+                <!-- Panacea -->
+                <div class="flex items-center justify-between gap-2 text-[10px]">
+                    <span class="text-slate-500 w-12">萬靈藥 (Pana)</span>
+                    <div class="flex items-center gap-1.5 flex-1 justify-end">
+                        <button onclick="adjustPanaStat('${stat}', -1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">-</button>
+                        <input id="edit-pana-${stat}" type="number" min="0" value="${panaVal}"
+                               class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center font-mono text-[10px] focus:outline-none"
+                               onchange="updatePanaStatLocal('${stat}', parseInt(this.value) || 0)">
+                        <button onclick="adjustPanaStat('${stat}', 1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">+</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    function updateTotalDisplay(stat) {
+        const char = getActiveChar();
+        if (!char) return;
+        const baseVal = (char.base && char.base[stat]) || 0;
+        const allocVal = (char.alloc && char.alloc[stat]) || 0;
+        const panaVal = (char.panacea && char.panacea[stat]) || 0;
+        const total = baseVal + allocVal + panaVal;
+        const el = document.getElementById(`edit-total-${stat}`);
+        if (el) el.textContent = total;
+    }
+
+    function updateBaseStatLocal(stat, val) {
+        updateBaseStat(stat, val);
+        updateTotalDisplay(stat);
+    }
+
+    function updateAllocStatLocal(stat, val) {
+        updateAllocStat(stat, val);
+        updateTotalDisplay(stat);
+    }
+
+    function updatePanaStatLocal(stat, val) {
+        updatePanaStat(stat, val);
+        updateTotalDisplay(stat);
+    }
+
+    function updateAllocStat(stat, value) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char) return;
+        if (!char.alloc) char.alloc = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+        char.alloc[stat] = Math.max(0, parseInt(value) || 0);
+        showStatus(`已更新分配屬性 ${stat} 為 ${value}`, 'success');
+    }
+
+    function updatePanaStat(stat, value) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char) return;
+        if (!char.panacea) char.panacea = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+        char.panacea[stat] = Math.max(0, parseInt(value) || 0);
+        showStatus(`已更新萬靈藥屬性 ${stat} 為 ${value}`, 'success');
+    }
+
+    function getItemTypeBadge(itemId) {
+        if (!itemId) return { text: '其', color: 'bg-slate-900/60 text-slate-500 border-slate-800' };
+        if (itemId.startsWith('wpn_')) {
+            return { text: '武', color: 'bg-red-950/70 border-red-900/40 text-red-300' };
+        } else if (itemId.startsWith('arm_')) {
+            return { text: '防', color: 'bg-blue-950/70 border-blue-900/40 text-blue-300' };
+        } else if (itemId.startsWith('acc_')) {
+            return { text: '飾', color: 'bg-yellow-950/70 border-yellow-900/40 text-yellow-300' };
+        } else if (itemId.startsWith('potion_') || itemId.startsWith('pot_')) {
+            return { text: '藥', color: 'bg-emerald-950/70 border-emerald-900/40 text-emerald-300' };
+        } else if (itemId.startsWith('scroll_') || itemId.startsWith('scr_')) {
+            return { text: '卷', color: 'bg-purple-950/70 border-purple-900/40 text-purple-300' };
+        }
+        return { text: '其', color: 'bg-slate-900/60 border-slate-800 text-slate-400' };
+    }
+
+    function renderEquipmentSlots() {
+        const container = document.getElementById('equipment-slots');
+        container.innerHTML = '';
+        const char = getActiveChar();
+        if (!char) return;
+        if (!char.eq) char.eq = {};
+
+        for (const slot of EQUIPMENT_SLOTS) {
+            const item = char.eq[slot.id];
+            const div = document.createElement('div');
+
+            if (item && typeof item === 'object') {
+                const itemHTML = getItemFullNameLocal(item);
+                
+                div.className = 'bg-slate-950/40 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-2 transition-all hover:border-slate-700 shadow-sm';
+                div.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-900/80 pb-1.5">
+                        <span class="text-yellow-500 font-bold font-serif text-xs">${slot.name}</span>
+                        <div class="flex gap-1.5">
+                            <button onclick="showEditItemModal('edit_eq', '${slot.id}')" class="px-2 py-0.5 bg-blue-950/60 hover:bg-blue-900/80 border border-blue-700/60 text-blue-300 text-[10px] shrink-0 font-bold rounded">編輯</button>
+                            <button onclick="removeEquipment('${slot.id}')" class="px-2 py-0.5 bg-red-950/60 hover:bg-red-900/80 border border-red-800/60 text-red-300 text-[10px] shrink-0 font-bold rounded">移除</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500 text-[10px]">ID:</span>
+                            <span class="font-mono text-slate-400 select-all text-[10px]">${item.id}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-slate-500 text-[10px]">名稱:</span>
+                            <span class="text-slate-200 truncate max-w-[120px] font-bold">${itemHTML}</span>
+                        </div>
+                        <div class="flex justify-between text-[10px]">
+                            <span class="text-slate-400">數量: <span class="text-slate-200 font-bold font-mono">${item.cnt || 1}</span></span>
+                            ${item.lock ? `<span class="text-red-400 font-bold">🔒 鎖定</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            } else {
+                div.className = 'bg-slate-950/20 border border-dashed border-slate-800 rounded-xl p-3 flex items-center justify-between transition-colors hover:bg-slate-900/20';
+                div.innerHTML = `
+                    <span class="text-slate-500 text-xs">${slot.name}: 空</span>
+                    <button onclick="showEditItemModal('add_eq', '${slot.id}')" class="px-2 py-1 bg-blue-950/60 hover:bg-blue-900/80 border border-blue-700/60 text-blue-300 text-[10px] rounded">穿戴裝備</button>
+                `;
+            }
+
+            container.appendChild(div);
+        }
+    }
+
+    function renderInventory() {
+        const container = document.getElementById('inventory-table');
+        container.innerHTML = '';
+        const char = getActiveChar();
+        if (!char) return;
+
+        if (!char.inv || char.inv.length === 0) {
+            container.innerHTML = '<div class="p-8 text-center text-slate-500 text-xs">背包中沒有任何物品</div>';
+            return;
+        }
+
+        for (let i = 0; i < char.inv.length; i++) {
+            const item = char.inv[i];
+            const itemHTML = getItemFullNameLocal(item);
+            const typeBadge = getItemTypeBadge(item.id);
+            
+            let details = [];
+            if (item.bless) details.push(item.bless === 'cursed' ? '詛咒' : '祝福');
+            if (item.anc) details.push(ancName(item.anc));
+            if (item.attr) {
+                const aff = ATTR_AFFIX_LOCAL[item.attr];
+                if (aff) details.push(aff.n);
+            }
+            if (item.seteff) details.push(`席琳[${item.seteff}]`);
+            const detailsStr = details.length > 0 ? details.join(', ') : '無';
+
+            const div = document.createElement('div');
+            div.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-950/40 border border-slate-800/80 rounded-xl gap-3 text-xs transition-all hover:bg-slate-950/70 hover:border-slate-700 shadow-sm';
+            div.innerHTML = `
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <span class="text-slate-500 font-mono text-[10px] w-5 shrink-0 text-right">${i + 1}</span>
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border ${typeBadge.color} shrink-0">
+                        ${typeBadge.text}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-white text-xs">${itemHTML}</span>
+                            ${item.lock ? `<span class="text-red-400 font-bold text-[10px]">🔒 鎖定</span>` : ''}
+                        </div>
+                        <div class="text-[10px] text-slate-500 font-mono mt-0.5 truncate select-all">
+                            ID: ${item.id}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between sm:justify-end gap-5 shrink-0 flex-wrap sm:flex-nowrap border-t sm:border-t-0 border-slate-900/60 pt-2 sm:pt-0">
+                    <div class="text-[10px] text-slate-400">
+                        詞綴: <span class="text-slate-300 font-mono">${detailsStr}</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-500 block">數量</span>
+                            <span class="font-bold font-mono text-slate-200">${item.cnt || 1}</span>
+                        </div>
+                        <div class="flex gap-1.5 ml-2">
+                            <button onclick="showEditItemModal('edit_inv', ${i})" class="px-3 py-1 bg-slate-850 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 text-slate-300 rounded font-bold transition-all active:scale-95 text-[11px]">編輯</button>
+                            <button onclick="removeInventoryItem(${i})" class="px-3 py-1 bg-red-950/60 hover:bg-red-900/80 border border-red-800/60 hover:border-red-600 text-red-300 rounded font-bold transition-all active:scale-95 text-[11px]">移除</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    // ===== Warehouse Helpers =====
+    function updateWarehouseGold(value) {
+        if (!saveData) return;
+        if (!saveData.wh) saveData.wh = { items: [], gold: 0 };
+        saveData.wh.gold = Math.max(0, parseInt(value) || 0);
+        showStatus('已更新倉庫金幣', 'success');
+    }
+
+    function renderWarehouse() {
+        const container = document.getElementById('warehouse-table');
+        const goldInput = document.getElementById('edit-wh-gold');
+        if (!container || !goldInput) return;
+
+        if (!saveData) return;
+        if (!saveData.wh) saveData.wh = { items: [], gold: 0 };
+        
+        goldInput.value = saveData.wh.gold || 0;
+        container.innerHTML = '';
+
+        const whItems = saveData.wh.items || [];
+        if (whItems.length === 0) {
+            container.innerHTML = '<div class="p-8 text-center text-slate-500 text-xs">倉庫中沒有任何物品</div>';
+            return;
+        }
+
+        for (let i = 0; i < whItems.length; i++) {
+            const item = whItems[i];
+            const itemHTML = getItemFullNameLocal(item);
+            const typeBadge = getItemTypeBadge(item.id);
+            
+            let details = [];
+            if (item.bless) details.push(item.bless === 'cursed' ? '詛咒' : '祝福');
+            if (item.anc) details.push(ancName(item.anc));
+            if (item.attr) {
+                const aff = ATTR_AFFIX_LOCAL[item.attr];
+                if (aff) details.push(aff.n);
+            }
+            if (item.seteff) details.push(`席琳[${item.seteff}]`);
+            const detailsStr = details.length > 0 ? details.join(', ') : '無';
+
+            const div = document.createElement('div');
+            div.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-950/40 border border-slate-800/80 rounded-xl gap-3 text-xs transition-all hover:bg-slate-950/70 hover:border-slate-700 shadow-sm';
+            div.innerHTML = `
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <span class="text-slate-500 font-mono text-[10px] w-5 shrink-0 text-right">${i + 1}</span>
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border ${typeBadge.color} shrink-0">
+                        ${typeBadge.text}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-white text-xs">${itemHTML}</span>
+                            ${item.lock ? `<span class="text-red-400 font-bold text-[10px]">🔒 鎖定</span>` : ''}
+                        </div>
+                        <div class="text-[10px] text-slate-500 font-mono mt-0.5 truncate select-all">
+                            ID: ${item.id}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between sm:justify-end gap-5 shrink-0 flex-wrap sm:flex-nowrap border-t sm:border-t-0 border-slate-900/60 pt-2 sm:pt-0">
+                    <div class="text-[10px] text-slate-400">
+                        詞綴: <span class="text-slate-300 font-mono">${detailsStr}</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-500 block">數量</span>
+                            <span class="font-bold font-mono text-slate-200">${item.cnt || 1}</span>
+                        </div>
+                        <div class="flex gap-1.5 ml-2">
+                            <button onclick="showEditItemModal('edit_wh', ${i})" class="px-3 py-1 bg-slate-850 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 text-slate-300 rounded font-bold transition-all active:scale-95 text-[11px]">編輯</button>
+                            <button onclick="removeWarehouseItem(${i})" class="px-3 py-1 bg-red-950/60 hover:bg-red-900/80 border border-red-800/60 hover:border-red-600 text-red-300 rounded font-bold transition-all active:scale-95 text-[11px]">移除</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    function removeWarehouseItem(index) {
+        if (!saveData || !saveData.wh || !saveData.wh.items[index]) return;
+
+        if (confirm('確定要移除這個倉庫物品嗎？')) {
+            saveData.wh.items.splice(index, 1);
+            renderWarehouse();
+            showStatus('已移除倉庫物品', 'success');
+        }
+    }
+
+    function adjustBaseStat(stat, delta) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char || !char.base) return;
+        const current = char.base[stat] || 0;
+        const newValue = Math.max(0, current + delta);
+        char.base[stat] = newValue;
+
+        document.getElementById(`edit-base-${stat}`).value = newValue;
+        showStatus(`已更新基礎屬性 ${stat} 為 ${newValue}`, 'success');
+    }
+
+    function removeEquipment(slotId) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char || !char.eq) return;
+
+        if (confirm('確定要移除這個裝備嗎？')) {
+            char.eq[slotId] = null;
+            renderEditor();
+            showStatus('已移除裝備', 'success');
+        }
+    }
+
+    function removeInventoryItem(index) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char || !char.inv || !char.inv[index]) return;
+
+        if (confirm('確定要移除這個物品嗎？')) {
+            char.inv.splice(index, 1);
+            renderEditor();
+            showStatus('已移除物品', 'success');
+        }
+    }
+
+    function showEditItemModal(type, target) {
+        editingContext = { type: type, target: target };
+        const char = getActiveChar();
+        
+        document.getElementById('edit-item-id').value = '';
+        document.getElementById('edit-item-cnt').value = '1';
+        document.getElementById('edit-item-en').value = '0';
+        document.getElementById('edit-item-lock').value = 'false';
+        document.getElementById('edit-item-bless').value = '';
+        document.getElementById('edit-item-anc').value = '';
+        document.getElementById('edit-item-attr').value = '';
+        document.getElementById('edit-item-seteff').value = '';
+
+        const titleEl = document.getElementById('modal-title');
+
+        if (type === 'add_inv') {
+            titleEl.textContent = '新增物品 (物品欄)';
+        } else if (type === 'add_wh') {
+            titleEl.textContent = '新增物品 (倉庫)';
+        } else if (type === 'add_eq') {
+            titleEl.textContent = `裝備新物品 (${EQUIPMENT_SLOTS.find(s => s.id === target)?.name})`;
+        } else if (type === 'edit_inv') {
+            titleEl.textContent = `編輯物品 (第 ${target + 1} 格)`;
+            const item = char.inv[target];
+            fillModalFields(item);
+        } else if (type === 'edit_wh') {
+            titleEl.textContent = `編輯倉庫物品 (第 ${target + 1} 格)`;
+            const item = saveData.wh.items[target];
+            fillModalFields(item);
+        } else if (type === 'edit_eq') {
+            titleEl.textContent = `編輯裝備 (${EQUIPMENT_SLOTS.find(s => s.id === target)?.name})`;
+            const item = char.eq[target];
+            fillModalFields(item);
+        }
+
+        document.getElementById('item-editor-modal').classList.remove('hidden');
+        document.getElementById('edit-item-id').focus();
+    }
+
+    function fillModalFields(item) {
+        if (!item) return;
+        document.getElementById('edit-item-id').value = item.id || '';
+        document.getElementById('edit-item-cnt').value = item.cnt || 1;
+        document.getElementById('edit-item-en').value = item.en || 0;
+        document.getElementById('edit-item-lock').value = item.lock ? 'true' : 'false';
+        
+        if (item.bless === 'cursed') {
+            document.getElementById('edit-item-bless').value = 'cursed';
+        } else if (item.bless) {
+            document.getElementById('edit-item-bless').value = 'true';
+        } else {
+            document.getElementById('edit-item-bless').value = '';
+        }
+
+        if (item.anc === 'eternal' || item.anc === 'immortal' || item.anc === 'primordial') {
+            document.getElementById('edit-item-anc').value = item.anc;
+        } else if (item.anc) {
+            document.getElementById('edit-item-anc').value = 'true';
+        } else {
+            document.getElementById('edit-item-anc').value = '';
+        }
+
+        document.getElementById('edit-item-attr').value = item.attr || '';
+        document.getElementById('edit-item-seteff').value = item.seteff || '';
+    }
+
+    function closeItemEditorModal() {
+        document.getElementById('item-editor-modal').classList.add('hidden');
+        editingContext = null;
+    }
+
+    function confirmSaveItem() {
+        if (!saveData) return;
+        const char = getActiveChar();
+
+        const itemId = document.getElementById('edit-item-id').value.trim();
+        const cnt = parseInt(document.getElementById('edit-item-cnt').value) || 1;
+        const en = parseInt(document.getElementById('edit-item-en').value) || 0;
+        const lock = document.getElementById('edit-item-lock').value === 'true';
+        
+        const blessVal = document.getElementById('edit-item-bless').value;
+        const bless = blessVal === 'true' ? true : (blessVal === 'cursed' ? 'cursed' : undefined);
+        
+        const ancVal = document.getElementById('edit-item-anc').value;
+        const anc = ancVal === 'true' ? true : (ancVal ? ancVal : undefined);
+        
+        const attrVal = document.getElementById('edit-item-attr').value;
+        const attr = attrVal ? attrVal : undefined;
+        
+        const seteffVal = document.getElementById('edit-item-seteff').value;
+        const seteff = seteffVal ? seteffVal : undefined;
+
+        if (!itemId) {
+            showStatus('請輸入物品 ID', 'warning');
+            return;
+        }
+
+        const item = { id: itemId, cnt: cnt };
+        if (en > 0) item.en = en;
+        if (lock) item.lock = true;
+        if (bless !== undefined) item.bless = bless;
+        if (anc !== undefined) item.anc = anc;
+        if (attr !== undefined) item.attr = attr;
+        if (seteff !== undefined) item.seteff = seteff;
+
+        if (editingContext.type === 'add_inv') {
+            item.uid = genUid();
+            if (!char.inv) char.inv = [];
+            char.inv.push(item);
+            showStatus(`已新增物品：${itemDb[itemId]?.n || itemId}`, 'success');
+        } else if (editingContext.type === 'add_wh') {
+            item.uid = genUid();
+            if (!saveData.wh) saveData.wh = { items: [], gold: 0 };
+            saveData.wh.items.push(item);
+            showStatus(`已新增倉庫物品：${itemDb[itemId]?.n || itemId}`, 'success');
+        } else if (editingContext.type === 'add_eq') {
+            if (!char.eq) char.eq = {};
+            char.eq[editingContext.target] = item;
+            showStatus(`已裝備 ${itemDb[itemId]?.n || itemId} 到 ${EQUIPMENT_SLOTS.find(s => s.id === editingContext.target)?.name}`, 'success');
+        } else if (editingContext.type === 'edit_inv') {
+            const origItem = char.inv[editingContext.target];
+            item.uid = origItem.uid || genUid();
+            char.inv[editingContext.target] = item;
+            showStatus(`已更新物品：${itemDb[itemId]?.n || itemId}`, 'success');
+        } else if (editingContext.type === 'edit_wh') {
+            const origItem = saveData.wh.items[editingContext.target];
+            item.uid = origItem.uid || genUid();
+            saveData.wh.items[editingContext.target] = item;
+            showStatus(`已更新倉庫物品：${itemDb[itemId]?.n || itemId}`, 'success');
+        } else if (editingContext.type === 'edit_eq') {
+            if (!char.eq) char.eq = {};
+            char.eq[editingContext.target] = item;
+            showStatus(`已更新裝備：${itemDb[itemId]?.n || itemId}`, 'success');
+        }
+
+        closeItemEditorModal();
+        renderEditor();
+    }
+
+    function unlockAllCards() {
+        if (!saveData || !saveData.p) return;
+        if (typeof DB === 'undefined' || !DB.mobs) {
+            showStatus('無法讀取怪物資料庫。請確認 js/00-data.js 已正確載入。', 'error');
+            return;
+        }
+        
+        saveData.p.cardDex = {};
+        for (const [key, mob] of Object.entries(DB.mobs)) {
+            if (mob.n) {
+                saveData.p.cardDex[mob.n] = 100;
+            }
+        }
+        saveData.p.cardDexV = 2;
+        showStatus('已成功解鎖「全卡片圖鑑」 (設定為滿積分 100 分)！', 'success');
+    }
+
+    function unlockAllEquips() {
+        if (!saveData || !saveData.p) return;
+        if (typeof DB === 'undefined' || !DB.items) {
+            showStatus('無法讀取物品資料庫。請確認 js/00-data.js 已正確載入。', 'error');
+            return;
+        }
+        
+        saveData.p.equipDex = {};
+        for (const [id, item] of Object.entries(DB.items)) {
+            if (item.type === 'wpn' || item.type === 'arm' || item.type === 'acc') {
+                saveData.p.equipDex[id] = true;
+            }
+        }
+        showStatus('已成功解鎖「全裝備圖鑑」！', 'success');
+    }
+
+    function unlockAllMiscs() {
+        if (!saveData || !saveData.p) return;
+        if (typeof DB === 'undefined' || !DB.items) {
+            showStatus('無法讀取物品資料庫。請確認 js/00-data.js 已正確載入。', 'error');
+            return;
+        }
+        
+        saveData.p.miscDex = {};
+        for (const [id, item] of Object.entries(DB.items)) {
+            if (item.type !== 'wpn' && item.type !== 'arm' && item.type !== 'acc' && item.type !== 'skillbk' && item.type !== 'etc') {
+                saveData.p.miscDex[id] = true;
+            }
+        }
+        showStatus('已成功解鎖「全收集品圖鑑」！', 'success');
+    }
+
+    function canCharLearnSkill(char, sk) {
+        if (!char || !sk) return false;
+        const cls = char.cls || 'knight';
+        const classReqKeys = {
+            knight: 'reqK',
+            mage: 'reqM',
+            elf: 'reqE',
+            dark: 'reqD',
+            illusion: 'reqI',
+            dragon: 'reqDk',
+            warrior: 'reqW',
+            royal: 'reqRoy'
+        };
+        const reqKey = classReqKeys[cls];
+        if (reqKey && sk[reqKey] !== undefined) {
+            return true;
+        }
+        const hasAnyClassReq = Object.values(classReqKeys).some(k => sk[k] !== undefined);
+        return !hasAnyClassReq;
+    }
+
+    function renderSkillsEditor() {
+        const container = document.getElementById('skills-container');
+        container.innerHTML = '';
+        
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char) return;
+        
+        const learned = char.skills || [];
+        
+        // Build skill book mapping matching game client
+        const skillSrc = {};
+        if (typeof DB !== 'undefined' && DB.items) {
+            for (const [id, item] of Object.entries(DB.items)) {
+                if (item && item.type === 'skillbk' && item.sk) {
+                    skillSrc[item.sk] = String(item.n || '').split('(')[0];
+                }
+            }
+        }
+        
+        const categories = {
+            mage: { name: char.cls === 'elf' ? '普通魔法 (1-6 級)' : (char.cls === 'knight' ? '普通魔法 (1-2 級)' : '法師魔法'), list: [] },
+            elf: { name: '精靈魔法', list: [] },
+            knight: { name: '技術書技能', list: [] },
+            warrior: { name: '戰士技能', list: [] },
+            royal: { name: '王族魔法', list: [] },
+            darkelf: { name: '黑暗妖精技能', list: [] },
+            illusion: { name: '幻術士魔法', list: [] },
+            dragon: { name: '龍騎士印記', list: [] },
+            other: { name: '其它 / 裝備授予技能', list: [] }
+        };
+        
+        if (typeof DB !== 'undefined' && DB.skills) {
+            for (const [id, sk] of Object.entries(DB.skills)) {
+                if (sk.procOnly) continue;
+                if (!canCharLearnSkill(char, sk)) continue;
+                
+                let cat = 'other';
+                const src = skillSrc[id];
+                
+                if (sk.cat === 'royal') {
+                    cat = 'royal';
+                } else if (sk.cat === 'blood' || sk.cat === 'rage' || sk.cat === 'endure') {
+                    cat = 'warrior';
+                } else if (src === '魔法書') {
+                    cat = 'mage';
+                } else if (src === '精靈水晶') {
+                    cat = 'elf';
+                } else if (src === '技術書') {
+                    cat = 'knight';
+                } else if (src === '黑暗精靈水晶') {
+                    cat = 'darkelf';
+                } else if (src === '記憶水晶') {
+                    cat = 'illusion';
+                } else if (src === '龍騎士書板') {
+                    cat = 'dragon';
+                } else {
+                    if (id.startsWith('sk_elf_')) {
+                        cat = 'elf';
+                    } else if (id.startsWith('sk_dark_')) {
+                        cat = 'darkelf';
+                    } else if (id.startsWith('sk_illu_')) {
+                        cat = 'illusion';
+                    } else if (id.startsWith('sk_dk_')) {
+                        cat = 'dragon';
+                    } else if (id.startsWith('sk_warrior_') || id.startsWith('sk_titan_')) {
+                        cat = 'warrior';
+                    } else if (sk.reqM) {
+                        cat = 'mage';
+                    } else if (sk.reqK) {
+                        cat = 'knight';
+                    } else if (sk.reqE) {
+                        cat = 'elf';
+                    }
+                }
+                
+                if (categories[cat]) {
+                    categories[cat].list.push({ id, ...sk });
+                } else {
+                    categories.other.list.push({ id, ...sk });
+                }
+            }
+        }
+        
+        for (const [catId, cat] of Object.entries(categories)) {
+            if (cat.list.length === 0) continue;
+            
+            const catDiv = document.createElement('div');
+            catDiv.className = 'bg-slate-950/40 p-4 rounded-xl border border-slate-800/80 space-y-3';
+            
+            const listHTML = cat.list.map(sk => {
+                const isLearned = learned.includes(sk.id);
+                const activeClasses = isLearned ? 'bg-slate-900 border-yellow-500 shadow-md shadow-yellow-500/10 scale-[1.01]' : 'bg-slate-950/20 border-slate-800 hover:bg-slate-900/40 hover:border-slate-800';
+                const textClasses = isLearned ? 'text-yellow-400 font-bold' : 'text-slate-400';
+                const glowDot = isLearned ? '<span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse shadow-sm shadow-yellow-500 shrink-0"></span>' : '<span class="w-1.5 h-1.5 rounded-full bg-slate-800 shrink-0"></span>';
+                
+                return `
+                    <div onclick="toggleSkillDirectly('${sk.id}')" class="cursor-pointer p-2.5 rounded-lg border flex items-center justify-between gap-2.5 transition-all select-none ${activeClasses}">
+                        <div class="flex items-center gap-2 min-w-0">
+                            ${glowDot}
+                            <span class="truncate text-xs ${textClasses}">${sk.n}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            catDiv.innerHTML = `
+                <h3 class="text-xs font-bold text-slate-300 border-b border-slate-900 pb-2 flex justify-between items-center font-serif">
+                    <span>${cat.name}</span>
+                    <span class="text-[10px] font-normal text-blue-400 flex gap-2">
+                        <button onclick="toggleCategorySkills('${catId}', true)" class="hover:underline cursor-pointer">全選</button>
+                        <span class="text-slate-700">|</span>
+                        <button onclick="toggleCategorySkills('${catId}', false)" class="hover:underline cursor-pointer">清除</button>
+                    </span>
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-xs">
+                    ${listHTML}
+                </div>
+            `;
+            container.appendChild(catDiv);
+        }
+        if (activeCharIndex >= 0) {
+            populateMercSkillDropdowns(char);
+        }
+    }
+
+    function toggleSkillDirectly(id) {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char) return;
+        if (!char.skills) char.skills = [];
+        const index = char.skills.indexOf(id);
+        let status = false;
+        if (index === -1) {
+            char.skills.push(id);
+            status = true;
+        } else {
+            char.skills.splice(index, 1);
+        }
+        
+        renderSkillsEditor();
+        const skObj = typeof DB !== 'undefined' && DB.skills ? DB.skills[id] : null;
+        const skName = skObj ? skObj.n : id;
+        showStatus(status ? `已學會技能：${skName}` : `已遺忘技能：${skName}`, 'success');
+    }
+
+    function toggleCategorySkills(catId, check) {
+        if (!saveData || typeof DB === 'undefined' || !DB.skills) return;
+        const char = getActiveChar();
+        if (!char) return;
+        
+        const skillSrc = {};
+        for (const [id, item] of Object.entries(DB.items)) {
+            if (item && item.type === 'skillbk' && item.sk) {
+                skillSrc[item.sk] = String(item.n || '').split('(')[0];
+            }
+        }
+        
+        const targetIds = [];
+        for (const [id, sk] of Object.entries(DB.skills)) {
+            if (sk.procOnly) continue;
+            if (!canCharLearnSkill(char, sk)) continue;
+            
+            let cat = 'other';
+            const src = skillSrc[id];
+            
+            if (sk.cat === 'royal') {
+                cat = 'royal';
+            } else if (sk.cat === 'blood' || sk.cat === 'rage' || sk.cat === 'endure') {
+                cat = 'warrior';
+            } else if (src === '魔法書') {
+                cat = 'mage';
+            } else if (src === '精靈水晶') {
+                cat = 'elf';
+            } else if (src === '技術書') {
+                cat = 'knight';
+            } else if (src === '黑暗精靈水晶') {
+                cat = 'darkelf';
+            } else if (src === '記憶水晶') {
+                cat = 'illusion';
+            } else if (src === '龍騎士書板') {
+                cat = 'dragon';
+            } else {
+                if (id.startsWith('sk_elf_')) {
+                    cat = 'elf';
+                } else if (id.startsWith('sk_dark_')) {
+                    cat = 'darkelf';
+                } else if (id.startsWith('sk_illu_')) {
+                    cat = 'illusion';
+                } else if (id.startsWith('sk_dk_')) {
+                    cat = 'dragon';
+                } else if (id.startsWith('sk_warrior_') || id.startsWith('sk_titan_')) {
+                    cat = 'warrior';
+                } else if (sk.reqM) {
+                    cat = 'mage';
+                } else if (sk.reqK) {
+                    cat = 'knight';
+                } else if (sk.reqE) {
+                    cat = 'elf';
+                }
+            }
+            
+            if (cat === catId) {
+                targetIds.push(id);
+            }
+        }
+        
+        if (!char.skills) char.skills = [];
+        
+        targetIds.forEach(id => {
+            const index = char.skills.indexOf(id);
+            if (check) {
+                if (index === -1) char.skills.push(id);
+            } else {
+                if (index !== -1) char.skills.splice(index, 1);
+            }
+        });
+        
+        renderSkillsEditor();
+        showStatus(`${check ? '已勾選' : '已清除'}該分類的所有技能`, 'success');
+    }
+
+    function learnAllSkills() {
+        if (!saveData || typeof DB === 'undefined' || !DB.skills) return;
+        const char = getActiveChar();
+        if (!char) return;
+        
+        char.skills = [];
+        for (const [id, sk] of Object.entries(DB.skills)) {
+            if (!sk.procOnly && canCharLearnSkill(char, sk)) {
+                char.skills.push(id);
+            }
+        }
+        renderSkillsEditor();
+        showStatus('已學會全部可學技能！', 'success');
+    }
+
+    function forgetAllSkills() {
+        if (!saveData) return;
+        const char = getActiveChar();
+        if (!char) return;
+        
+        char.skills = [];
+        renderSkillsEditor();
+        showStatus('已忘記全部技能！', 'success');
+    }
+
+    // ===== Browser LocalStorage Save/Load Integration =====
+    let loadedStorageKey = null;
+    let loadedFormatType = 'combined'; // 'combined' ({v, p, ms, ticks}) or 'direct' (player object directly)
+    let openerSaves = {};
+    let hasOpenerConnection = false;
+    let isOpenerMode = false;
+    let gameWindowReference = null; // 儲存連線中遊戲分頁的參照
+
+    // 監聽來自遊戲網頁的訊息
+    window.addEventListener('message', function(event) {
+        var message = event.data;
+        if (!message || typeof message !== 'object') return;
+
+        if (message.action === 'savesData') {
+            openerSaves = message.saves;
+            hasOpenerConnection = true;
+            gameWindowReference = event.source; // 補捉並儲存遊戲分頁的 window 物件參照
+            
+            // 回覆收到，通知遊戲網頁停止 ping 傳送
+            if (gameWindowReference) {
+                gameWindowReference.postMessage({ action: 'savesReceived' }, '*');
+            }
+            
+            // 更新 UI
+            updateBrowserSavesList();
+            updateBrowserLoadDropdownItems();
+            
+            showStatus('已成功連接遊戲網頁並取得存檔資料！', 'success');
+        } else if (message.action === 'saveResult') {
+            if (message.success) {
+                showStatus(`已成功存回遊戲網頁 [${message.key}]！`, 'success');
+            } else {
+                showStatus(`存回遊戲網頁失敗：${message.error}`, 'error');
+            }
+        }
+    });
+
+    function openGameWebsite() {
+        const input = document.getElementById('game-url-input');
+        if (!input) return;
+        
+        let url = input.value.trim();
+        if (!url) {
+            showStatus('請輸入有效的遊戲網站網址。', 'warning');
+            return;
+        }
+        
+        localStorage.setItem('__game_url', url);
+        window.open(url, 'idle_game_tab');
+    }
+
+    function initBookmarklet() {
+        const btn = document.getElementById('bookmarklet-btn');
+        if (!btn) return;
+        
+        let workspacePath = window.location.href;
+        
+        let rawCode = `(function(){
+            if (!window.opener) {
+                alert('請先在本機打開 save-editor.html，並使用編輯器上的「開啟遊戲網站」按鈕打開此頁，才能進行聯動連線！');
+                return;
+            }
+            
+            function getSaves() {
+                var keys = ['idle-lineage-game'];
+                for (var i = 1; i <= 8; i++) {
+                    keys.push('lineage_idle_save_' + i);
+                    keys.push('lineage_idle_save_' + i + '_bak');
+                }
+                keys.push('lineage_idle_warehouse','lineage_idle_warehouse_classic','lineage_idle_warehouse_trad','lineage_idle_warehouse_tradonly');
+                var saves = {};
+                keys.forEach(function(k) {
+                    var v = localStorage.getItem(k);
+                    if (v !== null) saves[k] = v;
+                });
+                return saves;
+            }
+            
+            var pingInterval = setInterval(function() {
+                if (window.opener.closed) {
+                    clearInterval(pingInterval);
+                    return;
+                }
+                window.opener.postMessage({ action: 'savesData', saves: getSaves() }, '*');
+            }, 300);
+            
+            function handler(event) {
+                var msg = event.data;
+                if (!msg || typeof msg !== 'object') return;
+                if (msg.action === 'savesReceived') {
+                    clearInterval(pingInterval);
+                } else if (msg.action === 'setSave') {
+                    try {
+                        localStorage.setItem(msg.key, msg.value);
+                        window.opener.postMessage({ action: 'saveResult', key: msg.key, success: true }, '*');
+                    } catch (e) {
+                        window.opener.postMessage({ action: 'saveResult', key: msg.key, success: false, error: e.message }, '*');
+                    }
+                }
+            }
+            window.removeEventListener('message', handler);
+            window.addEventListener('message', handler);
+            alert('已向本機編輯器送出連線同步要求！請切換回編輯器分頁確認。');
+        })()`;
+
+        let cleanCode = 'javascript:' + encodeURIComponent(rawCode.replace(/\s+/g, ' '));
+        btn.href = cleanCode;
+        
+        // 自動載入上次儲存的網址
+        const gameUrlInput = document.getElementById('game-url-input');
+        if (gameUrlInput) {
+            const savedUrl = localStorage.getItem('__game_url');
+            if (savedUrl) {
+                gameUrlInput.value = savedUrl;
+            }
+        }
+    }
+
+    function getOpenerSaveSummary(key) {
+        try {
+            let raw = openerSaves[key];
+            if (!raw) return null;
+            let payload = raw;
+            if (raw.startsWith('LZ1:')) {
+                payload = LZString.decompressFromUTF16(raw.slice(4));
+            }
+            if (payload && payload.startsWith('SIG1:')) {
+                payload = _saveUnwrap(payload).payload;
+            }
+            if (!payload) return null;
+            let data = JSON.parse(payload);
+            let p = data.p || (data.cls ? data : null);
+            if (p) {
+                let name = p.name || '未命名';
+                let clsName = getClassName(p.cls);
+                let lv = p.lv || 1;
+                return `${name} (${clsName}) Lv.${lv}`;
+            }
+        } catch (e) {
+            console.error('Error parsing remote summary for key:', key, e);
+        }
+        return '未知角色';
+    }
+
+    function toggleBrowserLoadDropdown() {
+        const menu = document.getElementById('browser-load-dropdown');
+        if (!menu) return;
+        
+        if (menu.classList.contains('hidden')) {
+            updateBrowserLoadDropdownItems();
+            menu.classList.remove('hidden');
+        } else {
+            menu.classList.add('hidden');
+        }
+    }
+    
+    function updateBrowserLoadDropdownItems() {
+        const menu = document.getElementById('browser-load-dropdown');
+        if (!menu) return;
+        
+        let html = '';
+        
+        // --- 網頁書籤連線存檔 ---
+        if (hasOpenerConnection) {
+            html += `
+                <div class="px-3 py-1.5 bg-slate-950 text-[10px] font-bold text-yellow-500 flex justify-between items-center tracking-wider">
+                    <span>網頁書籤連線存檔</span>
+                </div>
+            `;
+            
+            for (let i = 1; i <= 8; i++) {
+                let key = `lineage_idle_save_${i}`;
+                let summary = getOpenerSaveSummary(key);
+                html += `
+                    <button onclick="loadBrowserSave('${key}', true); toggleBrowserLoadDropdown();" class="w-full text-left px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors flex flex-col gap-0.5">
+                        <span class="font-bold">欄位 ${i} (${key})</span>
+                        <span class="text-[10px] text-slate-400 truncate">${summary || '（空）'}</span>
+                    </button>
+                `;
+            }
+        } else {
+            html += `
+                <div class="px-4 py-3 text-xs text-slate-400 text-center">
+                    請先使用書籤連線以載入網頁版存檔。
+                </div>
+            `;
+        }
+        
+        menu.innerHTML = html;
+    }
+
+    function updateBrowserSavesList() {
+        const container = document.getElementById('welcome-browser-saves');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        const keys = ['idle-lineage-game'];
+        for (let i = 1; i <= 8; i++) {
+            keys.push(`lineage_idle_save_${i}`);
+        }
+        
+        // 控制歡迎頁面書籤說明的顯示與隱藏
+        const instr = document.getElementById('bookmarklet-instructions');
+        if (instr) {
+            if (hasOpenerConnection) {
+                instr.classList.add('hidden');
+            } else {
+                instr.classList.remove('hidden');
+            }
+        }
+        
+        // 控制歡迎頁面存檔列表區塊的顯示與隱藏
+        const section = document.getElementById('welcome-browser-saves-section');
+        if (section) {
+            if (hasOpenerConnection) {
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+            }
+        }
+
+        // --- 渲染網頁連線存檔 ---
+        if (hasOpenerConnection) {
+            let hasOpenerSaves = false;
+            const openerHeader = document.createElement('div');
+            openerHeader.className = 'col-span-full border-b border-slate-800 pb-1 mt-2 text-[11px] font-bold text-yellow-500 tracking-wider';
+            openerHeader.innerHTML = `<span>網頁書籤連線存檔 (shines871.github.io)</span>`;
+            container.appendChild(openerHeader);
+
+            keys.forEach(key => {
+                let summary = getOpenerSaveSummary(key);
+                if (summary) {
+                    hasOpenerSaves = true;
+                    const btn = document.createElement('button');
+                    btn.onclick = () => loadBrowserSave(key, true);
+                    btn.className = 'p-3 bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-yellow-600/40 rounded-xl text-left transition-all active:scale-[0.99] flex flex-col gap-1';
+                    
+                    let displayName = key === 'idle-lineage-game' ? 'idle-lineage-game' : `網頁欄位 ${key.replace('lineage_idle_save_', '')}`;
+                    
+                    btn.innerHTML = `
+                        <div class="flex items-center justify-between w-full">
+                            <span class="font-bold text-xs text-white">${displayName}</span>
+                            <span class="px-1.5 py-0.5 rounded text-[8px] font-bold border border-yellow-900/50 bg-yellow-950/60 text-yellow-300">連線</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 truncate mt-0.5">
+                            ${summary}
+                        </div>
+                    `;
+                    container.appendChild(btn);
+                }
+            });
+            if (!hasOpenerSaves) {
+                const noOpener = document.createElement('div');
+                noOpener.className = 'col-span-full p-3 text-center text-slate-500 text-xs bg-slate-950/20 border border-dashed border-slate-800 rounded-xl';
+                noOpener.textContent = '（網頁端中無任何存檔）';
+                container.appendChild(noOpener);
+            }
+        }
+    }
+
+    async function loadBrowserSave(key, isOpener) {
+        try {
+            let raw = isOpener ? openerSaves[key] : localStorage.getItem(key);
+            if (!raw) {
+                showStatus('存檔內容為空，無法載入。', 'error');
+                return;
+            }
+            
+            let payload = raw;
+            if (raw.startsWith('LZ1:')) {
+                payload = LZString.decompressFromUTF16(raw.slice(4));
+            }
+            if (payload && payload.startsWith('SIG1:')) {
+                let unwrapped = _saveUnwrap(payload);
+                if (unwrapped.signed && !unwrapped.ok) {
+                    showStatus('存檔完整性校驗未通過，可能已被竄改。', 'error');
+                    return;
+                }
+                payload = unwrapped.payload;
+            }
+            
+            let data = JSON.parse(payload);
+            
+            let p = null;
+            if (data.p && data.p.cls) {
+                p = data.p;
+                loadedFormatType = 'combined';
+            } else if (data.cls) {
+                p = data;
+                loadedFormatType = 'direct';
+            } else {
+                showStatus('載入失敗：無效的存檔格式。', 'error');
+                return;
+            }
+            
+            let combinedData = {
+                v: data.v || 5,
+                p: p,
+                ms: data.ms || {},
+                ticks: data.ticks || 0,
+                wh: data.wh || { items: [], gold: 0 }
+            };
+            
+            if (!data.wh) {
+                let suffix = (p.classicMode && p.traditionalMode) ? '_trad' 
+                             : p.traditionalMode ? '_tradonly' 
+                             : p.classicMode ? '_classic' 
+                             : '';
+                let whKey = 'lineage_idle_warehouse' + suffix;
+                try {
+                    let whRaw = isOpener ? openerSaves[whKey] : localStorage.getItem(whKey);
+                    if (whRaw) {
+                        if (whRaw.startsWith('LZ1:')) {
+                            whRaw = LZString.decompressFromUTF16(whRaw.slice(4));
+                        }
+                        let whData = JSON.parse(whRaw);
+                        if (whData) {
+                            combinedData.wh = {
+                                items: whData.items || [],
+                                gold: whData.gold || 0
+                            };
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to load warehouse:', e);
+                }
+            }
+            
+            const ensureUids = (item) => {
+                if (item && !item.uid) {
+                    item.uid = genUid();
+                }
+            };
+            if (combinedData.p.inv && Array.isArray(combinedData.p.inv)) {
+                combinedData.p.inv.forEach(ensureUids);
+            }
+            if (combinedData.p.eq) {
+                Object.values(combinedData.p.eq).forEach(ensureUids);
+            }
+            if (combinedData.p.allies && Array.isArray(combinedData.p.allies)) {
+                combinedData.p.allies.forEach(ally => {
+                    if (ally) {
+                        if (ally.inv && Array.isArray(ally.inv)) ally.inv.forEach(ensureUids);
+                        if (ally.eq) Object.values(ally.eq).forEach(ensureUids);
+                    }
+                });
+            }
+            if (combinedData.wh && combinedData.wh.items && Array.isArray(combinedData.wh.items)) {
+                combinedData.wh.items.forEach(ensureUids);
+            }
+            
+            saveData = combinedData;
+            activeCharIndex = -1;
+            loadedStorageKey = key;
+            isOpenerMode = true; // 一律使用網頁連線模式
+            
+            const switcher = document.getElementById('char-switcher-panel');
+            if (switcher) switcher.classList.remove('hidden');
+            
+            const saveBtn = document.getElementById('btn-save-to-browser');
+            if (saveBtn) {
+                saveBtn.classList.remove('hidden');
+                saveBtn.textContent = `存回網頁 (${key === 'idle-lineage-game' ? 'game' : '欄位 ' + key.replace('lineage_idle_save_', '')})`;
+            }
+            
+            const editorContent = document.getElementById('editor-content');
+            if (editorContent) editorContent.classList.remove('hidden');
+            const welcome = document.getElementById('welcome-panel');
+            if (welcome) welcome.classList.add('hidden');
+            
+            populateActiveCharSelect();
+            renderEditor();
+            switchTab('tab-char');
+            showStatus(`從網頁連線載入 [${key}] 成功！`, 'success');
+            
+        } catch (e) {
+            console.error('Error loading save:', e);
+            showStatus('載入存檔時發生錯誤：' + e.message, 'error');
+        }
+    }
+
+    function saveToBrowser() {
+        if (!saveData || !saveData.p) {
+            showStatus('沒有可儲存的資料。', 'warning');
+            return;
+        }
+        
+        const validationError = validateSaveData();
+        if (validationError) {
+            showStatus('儲存失敗：' + validationError, 'error');
+            return;
+        }
+        
+        if (!loadedStorageKey) {
+            promptSaveTarget();
+            return;
+        }
+        
+        performOpenerSave(loadedStorageKey);
+    }
+
+    function promptSaveTarget() {
+        const select = document.getElementById('browser-save-target-select');
+        if (!select) return;
+        
+        select.innerHTML = '';
+        
+        // 遠端存檔選項
+        let grpRemote = document.createElement('optgroup');
+        grpRemote.label = '網頁版存檔 (shines871.github.io)';
+        
+        let idleSummaryRemote = getOpenerSaveSummary('idle-lineage-game');
+        let optIdleRemote = document.createElement('option');
+        optIdleRemote.value = 'remote|idle-lineage-game';
+        optIdleRemote.textContent = `idle-lineage-game (${idleSummaryRemote || '新存檔'})`;
+        grpRemote.appendChild(optIdleRemote);
+        
+        for (let i = 1; i <= 8; i++) {
+            let key = `lineage_idle_save_${i}`;
+            let summary = getOpenerSaveSummary(key);
+            let opt = document.createElement('option');
+            opt.value = `remote|${key}`;
+            opt.textContent = `欄位 ${i} (${summary || '空'})`;
+            grpRemote.appendChild(opt);
+        }
+        select.appendChild(grpRemote);
+        
+        document.getElementById('browser-save-modal').classList.remove('hidden');
+    }
+    
+    function closeBrowserSaveModal() {
+        document.getElementById('browser-save-modal').classList.add('hidden');
+    }
+    
+    function confirmSaveToBrowser() {
+        const select = document.getElementById('browser-save-target-select');
+        if (!select) return;
+        
+        const value = select.value;
+        if (!value) return;
+        
+        const parts = value.split('|');
+        const targetKey = parts[1];
+        
+        if (confirm(`確定要將目前的資料寫入網頁版的 [${targetKey}] 嗎？這會覆蓋原有的存檔。`)) {
+            loadedStorageKey = targetKey;
+            isOpenerMode = true;
+            
+            const saveBtn = document.getElementById('btn-save-to-browser');
+            if (saveBtn) {
+                saveBtn.classList.remove('hidden');
+                saveBtn.textContent = `存回網頁 (${targetKey === 'idle-lineage-game' ? 'game' : '欄位 ' + targetKey.replace('lineage_idle_save_', '')})`;
+            }
+            
+            performOpenerSave(targetKey);
+            closeBrowserSaveModal();
+        }
+    }
+
+    function performOpenerSave(key) {
+        try {
+            if (!gameWindowReference) {
+                showStatus('未偵測到連線中的遊戲網頁，請至遊戲分頁點擊書籤建立連線。', 'error');
+                return;
+            }
+            
+            let playerObj = saveData.p;
+            let payloadStr = '';
+            
+            if (loadedFormatType === 'combined') {
+                let saveSlotObj = {
+                    v: saveData.v || 5,
+                    p: playerObj,
+                    ms: saveData.ms || {},
+                    ticks: saveData.ticks || 0
+                };
+                if (key === 'idle-lineage-game') {
+                    saveSlotObj.wh = saveData.wh;
+                }
+                payloadStr = _saveWrap(JSON.stringify(saveSlotObj));
+            } else {
+                payloadStr = _saveWrap(JSON.stringify(playerObj));
+            }
+            
+            let compressed = 'LZ1:' + LZString.compressToUTF16(payloadStr);
+            
+            gameWindowReference.postMessage({
+                action: 'setSave',
+                key: key,
+                value: compressed
+            }, '*');
+            
+            if (key.startsWith('lineage_idle_save_')) {
+                let suffix = (playerObj.classicMode && playerObj.traditionalMode) ? '_trad' 
+                             : playerObj.traditionalMode ? '_tradonly' 
+                             : playerObj.classicMode ? '_classic' 
+                             : '';
+                let whKey = 'lineage_idle_warehouse' + suffix;
+                let whPayloadStr = JSON.stringify({
+                    items: saveData.wh.items || [],
+                    gold: saveData.wh.gold || 0
+                });
+                let whCompressed = 'LZ1:' + LZString.compressToUTF16(whPayloadStr);
+                gameWindowReference.postMessage({
+                    action: 'setSave',
+                    key: whKey,
+                    value: whCompressed
+                }, '*');
+            }
+        } catch (e) {
+            console.error('Error saving to game window:', e);
+            showStatus('儲存回網頁時發生錯誤：' + e.message, 'error');
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('browser-load-dropdown');
+        const dropdownBtn = document.querySelector('#browser-load-dropdown-container button');
+        if (dropdown && !dropdown.classList.contains('hidden') && e.target !== dropdown && dropdownBtn && !dropdownBtn.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+        
+        const modalDropdown = document.getElementById('modal-search-results-dropdown');
+        const modalInput = document.getElementById('edit-item-id');
+        if (modalDropdown && e.target !== modalDropdown && e.target !== modalInput) {
+            modalDropdown.classList.add('hidden');
+        }
+    });
+
+    // ===== Status Messages =====
+    function showStatus(message, type = 'info') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-[100] flex flex-col gap-2.5 max-w-sm w-auto';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'p-3.5 rounded-xl border text-xs font-bold shadow-2xl backdrop-blur-md flex items-center justify-between gap-3 transform translate-y-2 opacity-0 transition-all duration-300 pointer-events-auto';
+        
+        let typeClasses = '';
+        let icon = '';
+        switch (type) {
+            case 'error': 
+                typeClasses = 'bg-red-950/90 border-red-800 text-red-200'; 
+                icon = '❌';
+                break;
+            case 'warning': 
+                typeClasses = 'bg-yellow-950/90 border-yellow-800 text-yellow-200'; 
+                icon = '⚠️';
+                break;
+            case 'success': 
+                typeClasses = 'bg-emerald-950/90 border-emerald-800 text-emerald-200'; 
+                icon = '✔️';
+                break;
+            default:
+                typeClasses = 'bg-slate-900/95 border-slate-700 text-slate-200'; 
+                icon = 'ℹ️';
+                break;
+        }
+        
+        toast.className += ' ' + typeClasses;
+        toast.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span>${icon}</span>
+                <span>${message}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-slate-200 transition-colors text-[10px]">✕</button>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Trigger reflow for transition
+        toast.offsetHeight;
+        
+        // Slide & fade in
+        toast.classList.remove('translate-y-2', 'opacity-0');
+        
+        // Auto fade out after 3.5 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-y-2', 'opacity-0');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3500);
+    }
+
+    // ===== Initialize =====
+    document.addEventListener('DOMContentLoaded', () => {
+        initItemDb();
+        initBookmarklet();
+        updateBrowserSavesList();
+        showStatus('請選擇一個存檔檔案開始編輯。', 'info');
+
+        // Drag and Drop implementation
+        const dropZone = document.getElementById('welcome-panel');
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('border-yellow-600/60', 'bg-slate-900/80');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('border-yellow-600/60', 'bg-slate-900/80');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    loadSaveFile(files[0]);
+                }
+            }, false);
+        }
+    });
+    </script>
+</body>
+</html>
