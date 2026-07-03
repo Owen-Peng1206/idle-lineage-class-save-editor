@@ -2,10 +2,16 @@ name: Sync Submodule and Deploy Pages
 
 on:
   schedule:
-    # 這裡設定定時觸發，例如每天凌晨 0 點 (UTC 時間)
-    - cron: '30 * * * *'
-  workflow_dispatch:
-    # 允許你在 GitHub 網頁上點擊按鈕手動觸發
+    - cron: '52 * * * *'    # 每小時 52 分跑一次(保險用;閃過整分排程大軍);主力是 Cloudflare 每 15 分
+  workflow_dispatch: {}     # Cloudflare Worker 及手動(gh workflow run)都走這個入口
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
 
 jobs:
   sync-and-deploy:
