@@ -23,7 +23,7 @@
 
 1. **下載本專案**：
    ```bash
-   git clone --recursive <repository-url>
+   git clone --recursive https://github.com/Owen-Peng1206/idle-lineage-class-save-editor.git
    ```
    *(請注意：本專案包含遊戲引擎子模組 `idle-lineage-class`，複製時請加上 `--recursive` 參數以獲取完整的遊戲資料庫與 CSS)*
 2. **執行編輯器**：
@@ -41,9 +41,9 @@ idle-lineage-class-save-editor/
 │   ├── index.html           # 遊戲本體入口
 │   ├── js/00-data.js        # 遊戲資料庫 (物品、技能、怪物資料)
 │   └── css/tailwind-built.css  # 預編譯的 Tailwind CSS 樣式表
-├── .agents/
-│   └── AGENTS.md             # AI 協作開發規範
-└── CLAUDE.md                 # 開發維護指令指引
+├── README.md                 # 本專案說明文檔
+├── LICENSE.md                # 本專案授權文檔
+
 ```
 
 ## 🛠️ 開發與維護
