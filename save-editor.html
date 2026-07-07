@@ -180,6 +180,10 @@
     <header class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between mb-6 pb-4 border-b border-slate-800 gap-4">
         <div class="flex items-center gap-3">
             <h1 class="text-xl sm:text-2xl font-bold font-serif text-yellow-500 tracking-wider">放置天堂 存檔編輯器</h1>
+            <select id="editor-game-version" class="bg-slate-800 border border-slate-700 rounded text-xs text-slate-300 py-1 px-2 focus:outline-none" onchange="onVersionChange()">
+                <option value="latest">版本: Latest</option>
+                <option value="v3.0.59">版本: v3.0.59</option>
+            </select>
         </div>
         <div class="flex gap-2 w-full sm:w-auto relative">
             <label class="flex-1 sm:flex-none px-4 py-2 bg-blue-900 hover:bg-blue-800 border border-blue-700 rounded-lg text-sm text-blue-100 text-center font-bold cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow">
@@ -840,6 +844,30 @@
     </div>
 
     <script>
+        function getGameVersion() {
+            const el = document.getElementById('editor-game-version');
+            return el ? el.value : 'latest';
+        }
+        function onVersionChange() {
+            const v = getGameVersion();
+            const tradEl = document.getElementById('edit-traditional-mode');
+            if (tradEl && tradEl.parentElement) {
+                tradEl.parentElement.style.display = (v === 'latest') ? 'none' : 'flex';
+            }
+            const maxEn = v === 'latest' ? 15 : 20;
+            const searchEn = document.getElementById('search-add-en');
+            if (searchEn) {
+                searchEn.max = maxEn;
+                if (parseInt(searchEn.value) > maxEn) searchEn.value = maxEn;
+            }
+            const editEn = document.getElementById('edit-item-en');
+            if (editEn) {
+                editEn.max = maxEn;
+                if (parseInt(editEn.value) > maxEn) editEn.value = maxEn;
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => { onVersionChange(); });
+
     // ===== LZString Library (MIT, Pieroxy) =====
     if (typeof LZString === 'undefined') {
       window.LZString = (function () {
@@ -1039,7 +1067,8 @@
         }
 
         const qty = Math.max(1, parseInt(document.getElementById('search-add-qty').value) || 1);
-        const en = Math.max(0, parseInt(document.getElementById('search-add-en').value) || 0);
+        const maxEn = getGameVersion() === 'latest' ? 15 : 20;
+        const en = Math.max(0, Math.min(maxEn, parseInt(document.getElementById('search-add-en').value) || 0));
 
         const item = { id: itemId, cnt: qty };
         if (en > 0) item.en = en;
@@ -1329,6 +1358,10 @@
             if (validationError) {
                 showStatus('匯出失敗：' + validationError, 'error');
                 return;
+            }
+            
+            if (getGameVersion() === 'latest') {
+                saveData.p.traditionalMode = false;
             }
 
             let jsonStr = JSON.stringify(saveData);
@@ -2109,7 +2142,8 @@
 
         const itemId = document.getElementById('edit-item-id').value.trim();
         const cnt = parseInt(document.getElementById('edit-item-cnt').value) || 1;
-        const en = parseInt(document.getElementById('edit-item-en').value) || 0;
+        const maxEn = getGameVersion() === 'latest' ? 15 : 20;
+        const en = Math.max(0, Math.min(maxEn, parseInt(document.getElementById('edit-item-en').value) || 0));
         const lock = document.getElementById('edit-item-lock').value === 'true';
         
         const blessVal = document.getElementById('edit-item-bless').value;
@@ -2793,10 +2827,15 @@
             };
             
             if (!data.wh) {
-                let suffix = (p.classicMode && p.traditionalMode) ? '_trad' 
+                let suffix = '';
+                if (getGameVersion() === 'v3.0.59') {
+                    suffix = (p.classicMode && p.traditionalMode) ? '_trad' 
                              : p.traditionalMode ? '_tradonly' 
                              : p.classicMode ? '_classic' 
                              : '';
+                } else {
+                    suffix = p.classicMode ? '_classic' : '';
+                }
                 let whKey = 'lineage_idle_warehouse' + suffix;
                 try {
                     let whRaw = isOpener ? openerSaves[whKey] : localStorage.getItem(whKey);
@@ -2982,10 +3021,16 @@
             }, '*');
             
             if (key.startsWith('lineage_idle_save_')) {
-                let suffix = (playerObj.classicMode && playerObj.traditionalMode) ? '_trad' 
+                if (getGameVersion() === 'latest') playerObj.traditionalMode = false;
+                let suffix = '';
+                if (getGameVersion() === 'v3.0.59') {
+                    suffix = (playerObj.classicMode && playerObj.traditionalMode) ? '_trad' 
                              : playerObj.traditionalMode ? '_tradonly' 
                              : playerObj.classicMode ? '_classic' 
                              : '';
+                } else {
+                    suffix = playerObj.classicMode ? '_classic' : '';
+                }
                 let whKey = 'lineage_idle_warehouse' + suffix;
                 let whPayloadStr = JSON.stringify({
                     items: saveData.wh.items || [],
