@@ -2735,7 +2735,14 @@
                     clearInterval(pingInterval);
                 } else if (msg.action === 'setSave') {
                     try {
-                        localStorage.setItem(msg.key, msg.value);
+                        if (typeof window._lzWorkerRev !== 'undefined') {
+                            window._lzWorkerRev[msg.key] = (window._lzWorkerRev[msg.key] || 0) + 1;
+                        }
+                        if (typeof window._lsSet === 'function') {
+                            window._lsSet(msg.key, msg.value);
+                        } else {
+                            localStorage.setItem(msg.key, msg.value);
+                        }
                         window.opener.postMessage({ action: 'saveResult', key: msg.key, success: true }, '*');
                     } catch (e) {
                         window.opener.postMessage({ action: 'saveResult', key: msg.key, success: false, error: e.message }, '*');
