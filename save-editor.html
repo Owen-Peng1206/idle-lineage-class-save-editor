@@ -292,99 +292,103 @@
         <!-- Navigation Tabs -->
         <div class="tab-container">
             <button onclick="switchTab('tab-char')" id="btn-tab-char" class="tab-btn active">角色與屬性</button>
-            <button onclick="switchTab('tab-equip')" id="btn-tab-equip" class="tab-btn">裝備與背包</button>
+            <button onclick="switchTab('tab-equip')" id="btn-tab-equip" class="tab-btn">個人裝備</button>
+            <button onclick="switchTab('tab-inv')" id="btn-tab-inv" class="tab-btn">背包</button>
+            <button onclick="switchTab('tab-wh')" id="btn-tab-wh" class="tab-btn">共用倉庫</button>
+            <button onclick="switchTab('tab-pets')" id="btn-tab-pets" class="tab-btn">共用寵物</button>
             <button onclick="switchTab('tab-progress')" id="btn-tab-progress" class="tab-btn">冒險進度與圖鑑</button>
             <button onclick="switchTab('tab-skills')" id="btn-tab-skills" class="tab-btn">技能編輯</button>
             <button onclick="switchTab('tab-junk')" id="btn-tab-junk" class="tab-btn">自動賣出設定</button>
         </div>
 
         <!-- TAB 1: 角色與屬性 -->
-        <div id="tab-char" class="tab-pane space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Character Info Card -->
-                <div class="card lg:col-span-2 space-y-4">
-                    <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2 flex items-center gap-2">
-                        <span>角色基本資料</span>
-                    </h2>
+        <div id="tab-char" class="tab-pane">
+            <div class="mx-auto space-y-6" style="max-width: 600px;">
+            <!-- Character Info & Points Unified Card -->
+            <div class="card space-y-5">
+                <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2 flex items-center gap-2">
+                    <span>角色基本資料與配點狀態</span>
+                </h2>
+                
+                <div class="flex flex-col gap-4">
+                    <!-- Modern Grid Layout for Character Info -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="text-slate-400 text-xs w-20 shrink-0">職業:</span>
-                                <select id="edit-class" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs cursor-pointer focus:outline-none" onchange="updatePlayer('cls', this.value)">
-                                    <option value="knight">騎士 (knight)</option>
-                                    <option value="mage">法師 (mage)</option>
-                                    <option value="elf">妖精 (elf)</option>
-                                    <option value="dark">黑暗妖精 (dark)</option>
-                                    <option value="illusion">幻術士 (illusion)</option>
-                                    <option value="dragon">龍騎士 (dragon)</option>
-                                    <option value="warrior">戰士 (warrior)</option>
-                                    <option value="royal">王族 (royal)</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="text-slate-400 text-xs w-20 shrink-0">角色名稱:</span>
-                                <input id="edit-name" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none" onchange="updatePlayer('name', this.value)">
-                            </div>
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="text-slate-400 text-xs w-20 shrink-0">等級:</span>
-                                <input id="edit-lv" type="number" min="1" max="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono focus:outline-none text-center" onchange="updatePlayer('lv', parseInt(this.value) || 1)">
-                            </div>
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="text-slate-400 text-xs w-20 shrink-0">累積經驗:</span>
-                                <input id="edit-exp" type="number" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono focus:outline-none" onchange="updatePlayer('exp', parseInt(this.value) || 0)">
-                            </div>
+                        <!-- Class -->
+                        <div class="flex flex-col gap-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">職業 Class</label>
+                            <select id="edit-class" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm cursor-pointer focus:outline-none focus:border-blue-500 transition-colors" onchange="updatePlayer('cls', this.value)">
+                                <option value="knight">騎士 (knight)</option>
+                                <option value="mage">法師 (mage)</option>
+                                <option value="elf">妖精 (elf)</option>
+                                <option value="dark">黑暗妖精 (dark)</option>
+                                <option value="illusion">幻術士 (illusion)</option>
+                                <option value="dragon">龍騎士 (dragon)</option>
+                                <option value="warrior">戰士 (warrior)</option>
+                                <option value="royal">王族 (royal)</option>
+                            </select>
                         </div>
-                        
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="text-slate-400 text-xs w-20 shrink-0">擁有金幣:</span>
-                                <input id="edit-gold" type="number" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-yellow-400 font-bold text-xs font-mono focus:outline-none" onchange="updatePlayer('gold', parseInt(this.value) || 0)">
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <span class="text-slate-400 text-xs">血量 (HP):</span>
-                                <div class="flex gap-2">
-                                    <input id="edit-hp" type="number" min="0" placeholder="當前 HP" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono text-center focus:outline-none" onchange="updatePlayer('hp', parseInt(this.value) || 0)">
-                                    <input id="edit-mhp" type="number" min="0" placeholder="最大 HP" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono font-bold text-center focus:outline-none" onchange="updatePlayer('mhp', parseInt(this.value) || 0)">
-                                </div>
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <span class="text-slate-400 text-xs">魔力 (MP):</span>
-                                <div class="flex gap-2">
-                                    <input id="edit-mp" type="number" min="0" placeholder="當前 MP" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono text-center focus:outline-none" onchange="updatePlayer('mp', parseInt(this.value) || 0)">
-                                    <input id="edit-mmp" type="number" min="0" placeholder="最大 MP" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-xs font-mono font-bold text-center focus:outline-none" onchange="updatePlayer('mmp', parseInt(this.value) || 0)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Point status / Allocation Card -->
-                <div class="card space-y-4 flex flex-col justify-between">
-                    <div>
-                        <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2 flex items-center gap-2">
-                            <span>點數分配狀態</span>
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                            修改該角色的自由配點餘額以及當前已使用萬靈藥的次數。
-                        </p>
-                    </div>
-                    <div class="space-y-4 pt-4">
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-slate-400 text-xs">自由分配點數:</span>
-                            <input id="edit-bonus" type="number" min="0" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-center font-mono text-xs focus:outline-none" onchange="const char = getActiveChar(); if (char) { char.bonus = Math.max(0, parseInt(this.value) || 0); showStatus('已更新自由分配點數', 'success'); }">
+                        <!-- Name -->
+                        <div class="flex flex-col gap-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">角色名稱 Name</label>
+                            <input id="edit-name" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="updatePlayer('name', this.value)">
                         </div>
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-slate-400 text-xs">萬靈藥使用次數:</span>
-                            <input id="edit-panacea-used" type="number" min="0" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-center font-mono text-xs focus:outline-none" onchange="const char = getActiveChar(); if (char) { char.panaceaUsed = Math.max(0, parseInt(this.value) || 0); showStatus('已更新萬靈藥已使用次數', 'success'); }">
+
+                        <!-- Level -->
+                        <div class="flex flex-col gap-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">等級 Level</label>
+                            <input id="edit-lv" type="number" min="1" max="150" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-blue-500 transition-colors" onchange="updatePlayer('lv', parseInt(this.value) || 1)">
+                        </div>
+
+                        <!-- Exp -->
+                        <div class="flex flex-col gap-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
+                            <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">經驗值 Exp</label>
+                            <input id="edit-exp" type="number" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-blue-500 transition-colors" onchange="updatePlayer('exp', parseInt(this.value) || 0)">
+                        </div>
+
+                        <!-- Gold -->
+                        <div class="flex flex-col gap-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
+                            <label class="text-[11px] font-bold text-yellow-500/80 uppercase tracking-wider">擁有金幣 Gold</label>
+                            <input id="edit-gold" type="number" min="0" class="w-full bg-slate-900 border border-yellow-900/50 rounded-lg px-3 py-2 text-yellow-400 font-bold text-sm font-mono focus:outline-none focus:border-yellow-500 transition-colors" onchange="updatePlayer('gold', parseInt(this.value) || 0)">
+                        </div>
+
+                        <!-- HP -->
+                        <div class="flex flex-col gap-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
+                            <label class="text-[11px] font-bold text-red-400/80 uppercase tracking-wider">血量 HP (當前 / 最大)</label>
+                            <div class="flex items-center gap-2">
+                                <input id="edit-hp" type="number" min="0" class="w-1/2 bg-slate-900 border border-red-900/30 rounded-lg px-2 py-2 text-white text-sm font-mono text-center focus:outline-none focus:border-red-500 transition-colors" onchange="updatePlayer('hp', parseInt(this.value) || 0)">
+                                <span class="text-slate-600 font-bold">/</span>
+                                <input id="edit-mhp" type="number" min="0" class="w-1/2 bg-slate-900 border border-red-900/50 rounded-lg px-2 py-2 text-white text-sm font-mono text-center font-bold focus:outline-none focus:border-red-500 transition-colors" onchange="updatePlayer('mhp', parseInt(this.value) || 0)">
+                            </div>
+                        </div>
+
+                        <!-- MP -->
+                        <div class="flex flex-col gap-1.5 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80">
+                            <label class="text-[11px] font-bold text-blue-400/80 uppercase tracking-wider">魔力 MP (當前 / 最大)</label>
+                            <div class="flex items-center gap-2">
+                                <input id="edit-mp" type="number" min="0" class="w-1/2 bg-slate-900 border border-blue-900/30 rounded-lg px-2 py-2 text-white text-sm font-mono text-center focus:outline-none focus:border-blue-500 transition-colors" onchange="updatePlayer('mp', parseInt(this.value) || 0)">
+                                <span class="text-slate-600 font-bold">/</span>
+                                <input id="edit-mmp" type="number" min="0" class="w-1/2 bg-slate-900 border border-blue-900/50 rounded-lg px-2 py-2 text-white text-sm font-mono text-center font-bold focus:outline-none focus:border-blue-500 transition-colors" onchange="updatePlayer('mmp', parseInt(this.value) || 0)">
+                            </div>
+                        </div>
+
+                        <!-- Status Points -->
+                        <div class="flex flex-col gap-1.5 bg-blue-950/20 p-3 rounded-xl border border-blue-900/40">
+                            <label class="text-[11px] font-bold text-blue-400 uppercase tracking-wider">自由點數 / 萬靈藥次數</label>
+                            <div class="flex items-center gap-2">
+                                <input id="edit-bonus" type="number" min="0" title="自由分配點數" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm font-mono text-center focus:outline-none focus:border-blue-500 transition-colors" onchange="const char = getActiveChar(); if (char) { char.bonus = Math.max(0, parseInt(this.value) || 0); showStatus('已更新自由分配點數', 'success'); }">
+                                <span class="text-slate-600 font-bold">/</span>
+                                <input id="edit-panacea-used" type="number" min="0" title="萬靈藥使用次數" class="w-1/2 bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm font-mono text-center font-bold focus:outline-none focus:border-purple-500 transition-colors" onchange="const char = getActiveChar(); if (char) { char.panaceaUsed = Math.max(0, parseInt(this.value) || 0); showStatus('已更新萬靈藥已使用次數', 'success'); }">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Core Base Attributes Cards Grid -->
+            <!-- Core Base Attributes List -->
             <div class="card space-y-4">
                 <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">核心能力屬性面板 (整合基礎、配點、萬靈藥)</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="base-stats-container">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5" id="base-stats-container">
                     <!-- Automatically populated by JS -->
                 </div>
             </div>
@@ -548,18 +552,22 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
 
-        <!-- TAB 2: 裝備與背包 -->
+        <!-- TAB 2: 個人裝備 -->
         <div id="tab-equip" class="tab-pane hidden space-y-6">
             <!-- Equipment Slots Grid -->
             <div class="card space-y-4">
                 <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">當前穿戴裝備</h2>
-                <div id="equipment-slots" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                <div id="equipment-slots" class="grid gap-3" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
                     <!-- Automatically populated -->
                 </div>
             </div>
+        </div>
 
+        <!-- TAB: 背包 -->
+        <div id="tab-inv" class="tab-pane hidden space-y-6">
             <!-- Backpack Items -->
             <div class="card space-y-4">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-2 flex-wrap gap-2">
@@ -590,11 +598,14 @@
                 </div>
 
                 <!-- Responsive list container -->
-                <div id="inventory-table" class="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                <div id="inventory-table" class="grid gap-3 max-h-[500px] overflow-y-auto pr-1 pb-1" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
                     <!-- Automatically populated -->
                 </div>
             </div>
+        </div>
 
+        <!-- TAB: 共用倉庫 -->
+        <div id="tab-wh" class="tab-pane hidden space-y-6">
             <!-- Warehouse Panel -->
             <div class="card space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-2">
@@ -609,21 +620,42 @@
                 </div>
 
                 <!-- Responsive list container -->
-                <div id="warehouse-table" class="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                <div id="warehouse-table" class="grid gap-3 max-h-[500px] overflow-y-auto pr-1 pb-1" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                    <!-- Automatically populated -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: 共用寵物 -->
+        <div id="tab-pets" class="tab-pane hidden space-y-6">
+            <div class="card space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-2">
+                    <h2 class="text-lg font-bold font-serif text-yellow-500">共用寵物 (Pets)</h2>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <button onclick="maxAllPets()" class="px-4 py-1.5 bg-purple-900 hover:bg-purple-800 border border-purple-700 hover:border-purple-600 rounded-lg text-xs font-bold text-purple-100 shadow active:scale-95 transition-all" title="將所有共通保管中的寵物改為滿等、滿素質、滿喝水與頂級裝備">滿級神裝寵物</button>
+                    </div>
+                </div>
+                <div class="text-slate-300 text-sm">
+                    點擊「滿級神裝寵物」即可將存檔內所有的寵物設定為滿等級、滿素質與自動穿上頂級寵物裝備。
+                </div>
+                
+                <!-- Responsive list container -->
+                <div id="pets-table" class="grid gap-3 max-h-[500px] overflow-y-auto pr-1 pb-1" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
                     <!-- Automatically populated -->
                 </div>
             </div>
         </div>
 
         <!-- TAB 3: 冒險進度與圖鑑 -->
-        <div id="tab-progress" class="tab-pane hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Modes & Settings -->
-                <div class="card space-y-4">
-                    <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">遊戲進度與特殊模式</h2>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="space-y-3">
+        <div id="tab-progress" class="tab-pane hidden">
+            <div class="mx-auto space-y-6" style="max-width: 600px;">
+                <div class="grid grid-cols-1 gap-6">
+                    <!-- Modes & Settings -->
+                    <div class="card space-y-4">
+                        <h2 class="text-lg font-bold font-serif text-yellow-500 border-b border-slate-800 pb-2">遊戲進度與特殊模式</h2>
+                        
+                        <div class="flex flex-col gap-4">
+                            <div class="space-y-3">
                             <div class="flex items-center justify-between gap-3">
                                 <span class="text-slate-400 text-xs">經典模式 (Classic):</span>
                                 <select id="edit-classic-mode" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-xs cursor-pointer focus:outline-none" onchange="saveData.p.classicMode = this.value === 'true'; showStatus('已更新經典模式狀態', 'success');">
@@ -703,6 +735,7 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
 
         <!-- TAB 4: 技能編輯 -->
@@ -732,7 +765,7 @@
                     </div>
                 </div>
                 
-                <div id="junk-container" class="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                <div id="junk-container" class="grid gap-3 max-h-[600px] overflow-y-auto pr-2" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
                     <!-- Generated by JS -->
                 </div>
             </div>
@@ -742,7 +775,7 @@
 
     <!-- Item Editor Modal -->
     <div id="item-editor-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="modal-content w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-xl p-6 shadow-2xl space-y-5">
+        <div class="modal-content w-full bg-slate-900 border border-slate-700/80 rounded-xl p-6 shadow-2xl space-y-5" style="max-width: 600px;">
             <h3 id="modal-title" class="text-lg font-bold font-serif text-yellow-500 pb-2 border-b border-slate-800">編輯物品</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1245,7 +1278,7 @@
         const target = document.getElementById(tabId);
         if (target) target.classList.remove('hidden');
 
-        const tabs = ['tab-char', 'tab-equip', 'tab-progress', 'tab-skills'];
+        const tabs = ['tab-char', 'tab-equip', 'tab-inv', 'tab-wh', 'tab-pets', 'tab-progress', 'tab-skills', 'tab-junk'];
         tabs.forEach(t => {
             const btn = document.getElementById('btn-' + t);
             if (btn) {
@@ -1716,6 +1749,7 @@
         renderEquipmentSlots();
         renderInventory();
         renderWarehouse();
+        renderPets();
         renderJunkPrefs();
     }
     function renderBaseStats() {
@@ -1737,46 +1771,58 @@
             const total = baseVal + allocVal + panaVal;
 
             const div = document.createElement('div');
-            div.className = 'bg-slate-950/40 p-4 rounded-xl border border-slate-800/80 space-y-3';
+            div.className = 'bg-slate-900/40 p-4 rounded-xl border border-slate-800/80 hover:border-slate-600/80 transition-colors shadow-sm';
             div.innerHTML = `
-                <div class="flex items-center justify-between border-b border-slate-900 pb-1.5">
-                    <span class="text-slate-300 font-bold font-serif text-xs">${statNames[stat]} (${stat.toUpperCase()})</span>
-                    <span class="text-xs font-bold font-mono text-yellow-400" id="edit-total-${stat}">${total}</span>
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center font-bold text-slate-300 shadow-inner border border-slate-700/50">
+                            ${stat.toUpperCase()}
+                        </div>
+                        <span class="text-slate-200 font-bold text-sm tracking-wide">${statNames[stat]}</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-0.5">Total</div>
+                        <div class="text-xl font-bold text-yellow-400 leading-none font-mono" id="edit-total-${stat}">${total}</div>
+                    </div>
                 </div>
                 
-                <!-- Base -->
-                <div class="flex items-center justify-between gap-2 text-[10px]">
-                    <span class="text-slate-500 w-12">基礎 (Base)</span>
-                    <div class="flex items-center gap-1.5 flex-1 justify-end">
-                        <button onclick="adjustBaseStat('${stat}', -1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">-</button>
-                        <input id="edit-base-${stat}" type="number" min="0" max="999" value="${baseVal}"
-                               class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center font-mono text-[10px] focus:outline-none"
-                               onchange="updateBaseStatLocal('${stat}', parseInt(this.value) || 0)">
-                        <button onclick="adjustBaseStat('${stat}', 1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">+</button>
+                <!-- Controls Grid -->
+                <div class="grid grid-cols-3 gap-2">
+                    <!-- Base Control -->
+                    <div class="flex flex-col items-center bg-slate-950/60 rounded-lg p-2 border border-slate-800">
+                        <span class="text-[10px] text-slate-400 font-bold mb-1.5">基礎</span>
+                        <div class="flex items-center bg-slate-900 rounded-md border border-slate-700 p-0.5 w-full max-w-[80px]">
+                            <button onclick="adjustBaseStat('${stat}', -1)" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors">-</button>
+                            <input id="edit-base-${stat}" type="number" min="0" max="999" value="${baseVal}"
+                                   class="w-full min-w-0 bg-transparent text-center text-xs text-white font-mono focus:outline-none"
+                                   onchange="updateBaseStatLocal('${stat}', parseInt(this.value) || 0)">
+                            <button onclick="adjustBaseStat('${stat}', 1)" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors">+</button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Alloc -->
-                <div class="flex items-center justify-between gap-2 text-[10px]">
-                    <span class="text-slate-500 w-12">配點 (Alloc)</span>
-                    <div class="flex items-center gap-1.5 flex-1 justify-end">
-                        <button onclick="adjustAllocStat('${stat}', -1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">-</button>
-                        <input id="edit-alloc-${stat}" type="number" min="0" value="${allocVal}"
-                               class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center font-mono text-[10px] focus:outline-none"
-                               onchange="updateAllocStatLocal('${stat}', parseInt(this.value) || 0)">
-                        <button onclick="adjustAllocStat('${stat}', 1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">+</button>
+                    <!-- Alloc Control -->
+                    <div class="flex flex-col items-center bg-slate-950/60 rounded-lg p-2 border border-slate-800">
+                        <span class="text-[10px] text-slate-400 font-bold mb-1.5">配點</span>
+                        <div class="flex items-center bg-slate-900 rounded-md border border-slate-700 p-0.5 w-full max-w-[80px]">
+                            <button onclick="adjustAllocStat('${stat}', -1)" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors">-</button>
+                            <input id="edit-alloc-${stat}" type="number" min="0" max="999" value="${allocVal}"
+                                   class="w-full min-w-0 bg-transparent text-center text-xs text-white font-mono focus:outline-none"
+                                   onchange="updateAllocStatLocal('${stat}', parseInt(this.value) || 0)">
+                            <button onclick="adjustAllocStat('${stat}', 1)" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors">+</button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Panacea -->
-                <div class="flex items-center justify-between gap-2 text-[10px]">
-                    <span class="text-slate-500 w-12">萬靈藥 (Pana)</span>
-                    <div class="flex items-center gap-1.5 flex-1 justify-end">
-                        <button onclick="adjustPanaStat('${stat}', -1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">-</button>
-                        <input id="edit-pana-${stat}" type="number" min="0" value="${panaVal}"
-                               class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-white text-center font-mono text-[10px] focus:outline-none"
-                               onchange="updatePanaStatLocal('${stat}', parseInt(this.value) || 0)">
-                        <button onclick="adjustPanaStat('${stat}', 1)" class="w-6 h-6 rounded bg-slate-850 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-bold text-center flex items-center justify-center select-none active:scale-95 transition-all">+</button>
+                    <!-- Panacea Control -->
+                    <div class="flex flex-col items-center bg-slate-950/60 rounded-lg p-2 border border-slate-800">
+                        <span class="text-[10px] text-slate-400 font-bold mb-1.5">萬靈藥</span>
+                        <div class="flex items-center bg-slate-900 rounded-md border border-slate-700 p-0.5 w-full max-w-[80px]">
+                            <button onclick="adjustPanaStat('${stat}', -1)" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors">-</button>
+                            <input id="edit-pana-${stat}" type="number" min="0" max="999" value="${panaVal}"
+                                   class="w-full min-w-0 bg-transparent text-center text-xs text-white font-mono focus:outline-none"
+                                   onchange="updatePanaStatLocal('${stat}', parseInt(this.value) || 0)">
+                            <button onclick="adjustPanaStat('${stat}', 1)" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors">+</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1857,41 +1903,149 @@
 
             if (item && typeof item === 'object') {
                 const itemHTML = getItemFullNameLocal(item);
-                
-                div.className = 'bg-slate-950/40 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-2 transition-all hover:border-slate-700 shadow-sm';
+                const typeBadge = getItemTypeBadge(item.id);
+
+                let details = [];
+                if (item.bless) details.push(item.bless === 'cursed' ? '詛咒' : '祝福');
+                if (item.anc) details.push(ancName(item.anc));
+                if (item.attr) {
+                    const aff = ATTR_AFFIX_LOCAL[item.attr];
+                    if (aff) details.push(aff.n);
+                }
+                if (item.seteff) details.push(`席琳[${item.seteff}]`);
+                const detailsStr = details.length > 0 ? details.join(', ') : '';
+
+                const countBadge = item.cnt > 1 ? `<span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px] font-bold">x${item.cnt}</span>` : '';
+                const lockBadge = item.lock ? `<span class="px-2 py-0.5 rounded-md bg-red-950/50 border border-red-900/50 text-red-400 font-bold text-[10px] flex items-center gap-1"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>鎖定</span>` : '';
+                const detailsBadge = detailsStr ? `<span class="text-[11px] text-yellow-500/90 truncate px-2 py-0.5 bg-yellow-950/30 rounded border border-yellow-900/30">✦ ${detailsStr}</span>` : '';
+
+                const removeButtonHTML = `
+                    <button onclick="event.stopPropagation(); removeEquipment('${slot.id}')" class="flex items-center justify-center bg-red-950/60 hover:bg-red-600/80 border border-red-900/60 hover:border-red-400 text-xs rounded p-1.5 transition-all active:scale-95 shadow-sm ml-1" title="卸下裝備">
+                        ❌
+                    </button>
+                `;
+
+                div.className = 'group relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/80 rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-900/40 cursor-pointer';
+                div.setAttribute('onclick', `showEditItemModal('edit_eq', '${slot.id}')`);
                 div.innerHTML = `
-                    <div class="flex items-center justify-between border-b border-slate-900/80 pb-1.5">
-                        <span class="text-yellow-500 font-bold font-serif text-xs">${slot.name}</span>
-                        <div class="flex gap-1.5">
-                            <button onclick="showEditItemModal('edit_eq', '${slot.id}')" class="px-2 py-0.5 bg-blue-950/60 hover:bg-blue-900/80 border border-blue-700/60 text-blue-300 text-[10px] shrink-0 font-bold rounded">編輯</button>
-                            <button onclick="removeEquipment('${slot.id}')" class="px-2 py-0.5 bg-red-950/60 hover:bg-red-900/80 border border-red-800/60 text-red-300 text-[10px] shrink-0 font-bold rounded">移除</button>
+                    <!-- Item Info Section -->
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <!-- Number & Icon/Badge -->
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-yellow-600/80 font-bold font-serif text-[11px] w-10 text-right pr-1 shrink-0 truncate">${slot.name}</span>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs border bg-slate-950/50 shadow-inner ${typeBadge.color}">
+                                ${typeBadge.text}
+                            </div>
+                        </div>
+                        
+                        <!-- Text details -->
+                        <div class="flex flex-col min-w-0 justify-center">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-bold text-slate-100 text-sm tracking-wide truncate group-hover:text-blue-300 transition-colors">${itemHTML}</span>
+                                ${countBadge}
+                                ${lockBadge}
+                            </div>
+                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                <span class="text-[10px] text-slate-500 font-mono truncate bg-slate-950/60 px-1.5 py-0.5 rounded border border-slate-800">ID: ${item.id}</span>
+                                ${detailsBadge}
+                                ${removeButtonHTML}
+                            </div>
                         </div>
                     </div>
-                    <div class="space-y-1 text-xs">
-                        <div class="flex items-center justify-between">
-                            <span class="text-slate-500 text-[10px]">ID:</span>
-                            <span class="font-mono text-slate-400 select-all text-[10px]">${item.id}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-slate-500 text-[10px]">名稱:</span>
-                            <span class="text-slate-200 truncate max-w-[120px] font-bold">${itemHTML}</span>
-                        </div>
-                        <div class="flex justify-between text-[10px]">
-                            <span class="text-slate-400">數量: <span class="text-slate-200 font-bold font-mono">${item.cnt || 1}</span></span>
-                            ${item.lock ? `<span class="text-red-400 font-bold">🔒 鎖定</span>` : ''}
-                        </div>
+                    
+                    <!-- Hover Edit Indicator -->
+                    <div class="hidden sm:flex items-center gap-1.5 text-blue-500/70 opacity-0 group-hover:opacity-100 transition-opacity pr-2 shrink-0 text-xs font-bold">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        點擊編輯
                     </div>
                 `;
             } else {
-                div.className = 'bg-slate-950/20 border border-dashed border-slate-800 rounded-xl p-3 flex items-center justify-between transition-colors hover:bg-slate-900/20';
+                div.className = 'group relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3 bg-slate-950/40 border border-slate-800/80 border-dashed rounded-xl transition-all hover:bg-slate-900/60 hover:border-slate-700 cursor-pointer';
+                div.setAttribute('onclick', `showEditItemModal('edit_eq', '${slot.id}')`);
                 div.innerHTML = `
-                    <span class="text-slate-500 text-xs">${slot.name}: 空</span>
-                    <button onclick="showEditItemModal('add_eq', '${slot.id}')" class="px-2 py-1 bg-blue-950/60 hover:bg-blue-900/80 border border-blue-700/60 text-blue-300 text-[10px] rounded">穿戴裝備</button>
+                    <div class="flex items-center gap-3 min-w-0 flex-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-slate-500 font-bold font-serif text-[11px] w-10 text-right pr-1 shrink-0 truncate">${slot.name}</span>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs border border-slate-800 bg-slate-900 shadow-inner text-slate-600">
+                                空
+                            </div>
+                        </div>
+                        <div class="flex flex-col min-w-0 justify-center">
+                            <span class="text-slate-500 text-sm italic">未裝備</span>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-1.5 text-blue-500/70 opacity-0 group-hover:opacity-100 transition-opacity pr-2 shrink-0 text-xs font-bold">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        裝備
+                    </div>
                 `;
             }
 
             container.appendChild(div);
         }
+    }
+
+    function renderItemRowHTML(item, i, type) {
+        const itemHTML = getItemFullNameLocal(item);
+        const typeBadge = getItemTypeBadge(item.id);
+        
+        let details = [];
+        if (item.bless) details.push(item.bless === 'cursed' ? '詛咒' : '祝福');
+        if (item.anc) details.push(ancName(item.anc));
+        if (item.attr) {
+            const aff = ATTR_AFFIX_LOCAL[item.attr];
+            if (aff) details.push(aff.n);
+        }
+        if (item.seteff) details.push(`席琳[${item.seteff}]`);
+        const detailsStr = details.length > 0 ? details.join(', ') : '無';
+
+        const editAction = type === 'inv' ? `showEditItemModal('edit_inv', ${i})` : `showEditItemModal('edit_wh', ${i})`;
+        const removeAction = type === 'inv' ? `removeInventoryItem(${i})` : `removeWarehouseItem(${i})`;
+        
+        const countBadge = item.cnt > 1 ? `<span class="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[10px] font-bold">x${item.cnt}</span>` : '';
+        const lockBadge = item.lock ? `<span class="px-2 py-0.5 rounded-md bg-red-950/50 border border-red-900/50 text-red-400 font-bold text-[10px] flex items-center gap-1"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>鎖定</span>` : '';
+        const detailsBadge = detailsStr !== '無' ? `<span class="text-[11px] text-yellow-500/90 truncate px-2 py-0.5 bg-yellow-950/30 rounded border border-yellow-900/30">✦ ${detailsStr}</span>` : '';
+
+        const removeButtonHTML = `
+            <button onclick="event.stopPropagation(); ${removeAction}" class="flex items-center justify-center bg-red-950/60 hover:bg-red-600/80 border border-red-900/60 hover:border-red-400 text-xs rounded p-1.5 transition-all active:scale-95 shadow-sm ml-1" title="移除此物品">
+                ❌
+            </button>
+        `;
+
+        return `
+            <div onclick="${editAction}" class="group relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/80 rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-900/40 cursor-pointer">
+                <!-- Item Info Section -->
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <!-- Number & Icon/Badge -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-slate-600 font-mono text-[11px] w-5 text-right pr-1">${i + 1}</span>
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs border bg-slate-950/50 shadow-inner ${typeBadge.color}">
+                            ${typeBadge.text}
+                        </div>
+                    </div>
+                    
+                    <!-- Text details -->
+                    <div class="flex flex-col min-w-0 justify-center">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-slate-100 text-sm tracking-wide truncate group-hover:text-blue-300 transition-colors">${itemHTML}</span>
+                            ${countBadge}
+                            ${lockBadge}
+                        </div>
+                        <div class="flex items-center gap-2 mt-1 flex-wrap">
+                            <span class="text-[10px] text-slate-500 font-mono truncate bg-slate-950/60 px-1.5 py-0.5 rounded border border-slate-800">ID: ${item.id}</span>
+                            ${detailsBadge}
+                            ${removeButtonHTML}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hover Edit Indicator -->
+                <div class="hidden sm:flex items-center gap-1.5 text-blue-500/70 opacity-0 group-hover:opacity-100 transition-opacity pr-2 shrink-0 text-xs font-bold">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    點擊編輯
+                </div>
+            </div>
+        `;
     }
 
     function renderInventory() {
@@ -1907,56 +2061,9 @@
 
         for (let i = 0; i < char.inv.length; i++) {
             const item = char.inv[i];
-            const itemHTML = getItemFullNameLocal(item);
-            const typeBadge = getItemTypeBadge(item.id);
-            
-            let details = [];
-            if (item.bless) details.push(item.bless === 'cursed' ? '詛咒' : '祝福');
-            if (item.anc) details.push(ancName(item.anc));
-            if (item.attr) {
-                const aff = ATTR_AFFIX_LOCAL[item.attr];
-                if (aff) details.push(aff.n);
-            }
-            if (item.seteff) details.push(`席琳[${item.seteff}]`);
-            const detailsStr = details.length > 0 ? details.join(', ') : '無';
-
             const div = document.createElement('div');
-            div.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-950/40 border border-slate-800/80 rounded-xl gap-3 text-xs transition-all hover:bg-slate-950/70 hover:border-slate-700 shadow-sm';
-            div.innerHTML = `
-                <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <span class="text-slate-500 font-mono text-[10px] w-5 shrink-0 text-right">${i + 1}</span>
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border ${typeBadge.color} shrink-0">
-                        ${typeBadge.text}
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-bold text-white text-xs">${itemHTML}</span>
-                            ${item.lock ? `<span class="text-red-400 font-bold text-[10px]">🔒 鎖定</span>` : ''}
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-mono mt-0.5 truncate select-all">
-                            ID: ${item.id}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex items-center justify-between sm:justify-end gap-5 shrink-0 flex-wrap sm:flex-nowrap border-t sm:border-t-0 border-slate-900/60 pt-2 sm:pt-0">
-                    <div class="text-[10px] text-slate-400">
-                        詞綴: <span class="text-slate-300 font-mono">${detailsStr}</span>
-                    </div>
-                    
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <span class="text-[10px] text-slate-500 block">數量</span>
-                            <span class="font-bold font-mono text-slate-200">${item.cnt || 1}</span>
-                        </div>
-                        <div class="flex gap-1.5 ml-2">
-                            <button onclick="showEditItemModal('edit_inv', ${i})" class="px-3 py-1 bg-slate-850 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 text-slate-300 rounded font-bold transition-all active:scale-95 text-[11px]">編輯</button>
-                            <button onclick="removeInventoryItem(${i})" class="px-3 py-1 bg-red-950/60 hover:bg-red-900/80 border border-red-800/60 hover:border-red-600 text-red-300 rounded font-bold transition-all active:scale-95 text-[11px]">移除</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(div);
+            div.innerHTML = renderItemRowHTML(item, i, 'inv');
+            container.appendChild(div.firstElementChild);
         }
     }
 
@@ -1987,56 +2094,9 @@
 
         for (let i = 0; i < whItems.length; i++) {
             const item = whItems[i];
-            const itemHTML = getItemFullNameLocal(item);
-            const typeBadge = getItemTypeBadge(item.id);
-            
-            let details = [];
-            if (item.bless) details.push(item.bless === 'cursed' ? '詛咒' : '祝福');
-            if (item.anc) details.push(ancName(item.anc));
-            if (item.attr) {
-                const aff = ATTR_AFFIX_LOCAL[item.attr];
-                if (aff) details.push(aff.n);
-            }
-            if (item.seteff) details.push(`席琳[${item.seteff}]`);
-            const detailsStr = details.length > 0 ? details.join(', ') : '無';
-
             const div = document.createElement('div');
-            div.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-950/40 border border-slate-800/80 rounded-xl gap-3 text-xs transition-all hover:bg-slate-950/70 hover:border-slate-700 shadow-sm';
-            div.innerHTML = `
-                <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <span class="text-slate-500 font-mono text-[10px] w-5 shrink-0 text-right">${i + 1}</span>
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border ${typeBadge.color} shrink-0">
-                        ${typeBadge.text}
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-bold text-white text-xs">${itemHTML}</span>
-                            ${item.lock ? `<span class="text-red-400 font-bold text-[10px]">🔒 鎖定</span>` : ''}
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-mono mt-0.5 truncate select-all">
-                            ID: ${item.id}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex items-center justify-between sm:justify-end gap-5 shrink-0 flex-wrap sm:flex-nowrap border-t sm:border-t-0 border-slate-900/60 pt-2 sm:pt-0">
-                    <div class="text-[10px] text-slate-400">
-                        詞綴: <span class="text-slate-300 font-mono">${detailsStr}</span>
-                    </div>
-                    
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <span class="text-[10px] text-slate-500 block">數量</span>
-                            <span class="font-bold font-mono text-slate-200">${item.cnt || 1}</span>
-                        </div>
-                        <div class="flex gap-1.5 ml-2">
-                            <button onclick="showEditItemModal('edit_wh', ${i})" class="px-3 py-1 bg-slate-850 hover:bg-slate-800 border border-slate-700/60 hover:border-slate-600 text-slate-300 rounded font-bold transition-all active:scale-95 text-[11px]">編輯</button>
-                            <button onclick="removeWarehouseItem(${i})" class="px-3 py-1 bg-red-950/60 hover:bg-red-900/80 border border-red-800/60 hover:border-red-600 text-red-300 rounded font-bold transition-all active:scale-95 text-[11px]">移除</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.appendChild(div);
+            div.innerHTML = renderItemRowHTML(item, i, 'wh');
+            container.appendChild(div.firstElementChild);
         }
     }
 
@@ -2090,33 +2150,37 @@
             const detailsStr = details.length > 0 ? details.join(', ') : '無';
 
             const div = document.createElement('div');
-            div.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-950/40 border border-slate-800/80 rounded-xl gap-3 text-xs transition-all hover:bg-slate-950/70 hover:border-slate-700 shadow-sm';
+            div.className = 'bg-slate-950/40 border border-slate-800/80 rounded-xl p-3 flex flex-col gap-3 hover:bg-slate-900/60 hover:border-slate-700 transition-all group relative';
             div.innerHTML = `
-                <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <span class="text-slate-500 font-mono text-[10px] w-5 shrink-0 text-right">${i + 1}</span>
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border ${typeBadge.color} shrink-0">
+                <!-- Header: Badge & Name -->
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs border ${typeBadge.color} shrink-0 shadow-sm">
                         ${typeBadge.text}
                     </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-bold text-white text-xs">${itemHTML}</span>
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-mono mt-0.5 truncate select-all">
-                            ID: ${item.id} | 設定鍵值: ${key}
-                        </div>
+                    <div class="flex-1 min-w-0 pt-0.5">
+                        <div class="font-bold text-white text-sm line-clamp-2 leading-tight">${itemHTML}</div>
+                        <div class="text-[10px] text-slate-500 font-mono mt-1 truncate select-all" title="ID: ${item.id} | Key: ${key}">ID: ${item.id}</div>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-between sm:justify-end gap-5 shrink-0 flex-wrap sm:flex-nowrap border-t sm:border-t-0 border-slate-900/60 pt-2 sm:pt-0">
-                    <div class="text-[10px] text-slate-400">
-                        詞綴: <span class="text-slate-300 font-mono">${detailsStr}</span>
+                <!-- Details Area -->
+                <div class="bg-slate-900/60 rounded-lg border border-slate-800 p-2.5 space-y-2 flex-1 flex flex-col justify-center">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 font-bold">附加詞綴</span>
+                        <span class="text-slate-300 font-mono text-right truncate pl-2">${detailsStr}</span>
                     </div>
-                    
-                    <div class="flex items-center gap-3">
-                        <div class="flex gap-1.5 ml-2">
-                            <button onclick="removeJunkPref('${key}')" class="px-3 py-1 bg-red-950/60 hover:bg-red-900/80 border border-red-800/60 hover:border-red-600 text-red-300 rounded font-bold transition-all active:scale-95 text-[11px]">取消自動賣出</button>
-                        </div>
+                    <div class="flex justify-between items-center text-[10px] border-t border-slate-800/50 pt-1.5">
+                        <span class="text-slate-500">內部鍵值 (Key)</span>
+                        <span class="text-slate-400 font-mono truncate pl-2">${key}</span>
                     </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-end pt-2 mt-1 border-t border-slate-800/60">
+                    <button onclick="removeJunkPref('${key}')" class="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 border border-red-900/30 hover:border-red-500/50 text-red-400 rounded flex items-center justify-center gap-1.5 font-bold transition-all active:scale-[0.95] text-[11px] shadow-sm">
+                        <svg class="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        取消自動賣出
+                    </button>
                 </div>
             `;
             container.appendChild(div);
@@ -2712,6 +2776,7 @@
                     keys.push('lineage_idle_save_' + i + '_bak');
                 }
                 keys.push('lineage_idle_warehouse','lineage_idle_warehouse_classic','lineage_idle_warehouse_trad','lineage_idle_warehouse_tradonly');
+                keys.push('fb5_pet_roster','fb5_pet_roster_classic','fb5_pet_roster_trad','fb5_pet_roster_tradonly');
                 var saves = {};
                 keys.forEach(function(k) {
                     var v = localStorage.getItem(k);
@@ -2953,16 +3018,16 @@
                 wh: data.wh || { items: [], gold: 0 }
             };
             
+            let suffix = '';
+            if (getGameVersion() === 'v3.0.59') {
+                suffix = (p.classicMode && p.traditionalMode) ? '_trad' 
+                         : p.traditionalMode ? '_tradonly' 
+                         : p.classicMode ? '_classic' 
+                         : '';
+            } else {
+                suffix = p.classicMode ? '_classic' : '';
+            }
             if (!data.wh) {
-                let suffix = '';
-                if (getGameVersion() === 'v3.0.59') {
-                    suffix = (p.classicMode && p.traditionalMode) ? '_trad' 
-                             : p.traditionalMode ? '_tradonly' 
-                             : p.classicMode ? '_classic' 
-                             : '';
-                } else {
-                    suffix = p.classicMode ? '_classic' : '';
-                }
                 let whKey = 'lineage_idle_warehouse' + suffix;
                 try {
                     let whRaw = isOpener ? openerSaves[whKey] : localStorage.getItem(whKey);
@@ -2981,6 +3046,24 @@
                 } catch (e) {
                     console.warn('Failed to load warehouse:', e);
                 }
+            }
+            if (!data.pets) {
+                let petKey = 'fb5_pet_roster' + suffix;
+                try {
+                    let petRaw = isOpener ? openerSaves[petKey] : localStorage.getItem(petKey);
+                    if (petRaw) {
+                        let un = _saveUnwrap(petRaw);
+                        if (un && un.ok) {
+                            let petArr = JSON.parse(un.payload);
+                            if (Array.isArray(petArr)) {
+                                combinedData.pets = petArr;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to load pet roster:', e);
+                }
+                if (!combinedData.pets) combinedData.pets = [];
             }
             
             const ensureUids = (item) => {
@@ -3169,6 +3252,17 @@
                     key: whKey,
                     value: whCompressed
                 }, '*');
+
+                if (saveData.pets && Array.isArray(saveData.pets)) {
+                    let petKey = 'fb5_pet_roster' + suffix;
+                    let petPayloadStr = _saveWrap(JSON.stringify(saveData.pets));
+                    let petCompressed = 'LZ1:' + LZString.compressToUTF16(petPayloadStr);
+                    gameWindowReference.postMessage({
+                        action: 'setSave',
+                        key: petKey,
+                        value: petCompressed
+                    }, '*');
+                }
             }
         } catch (e) {
             console.error('Error saving to game window:', e);
@@ -3191,6 +3285,78 @@
     });
 
     // ===== Status Messages =====
+    function maxAllPets() {
+        if (!saveData || !saveData.pets || saveData.pets.length === 0) {
+            showStatus('目前沒有任何寵物在保管中', 'error');
+            return;
+        }
+        let count = 0;
+        saveData.pets.forEach(p => {
+            p.lv = 99;
+            p.exp = 0;
+            p.mhp = 9999;
+            p.hp = 9999;
+            p.mmp = 9999;
+            p.mp = 9999;
+            p.potPct = 95;
+            p.eq = {
+                wpn: { id: 'pet_fang_victory', en: 50, uid: genUid(), c: 1, u: true },
+                arm: { id: 'pet_arm_mithril', en: 50, uid: genUid(), c: 1, u: true }
+            };
+            count++;
+        });
+        showStatus(`已將 ${count} 隻寵物改為滿素質與神裝`, 'success');
+        
+        // Ensure saveData is saved back to localStorage if not in opener mode
+        if (typeof exportData === 'function') {
+            exportData();
+        }
+        renderPets();
+    }
+
+    function renderPets() {
+        const container = document.getElementById('pets-table');
+        if (!container) return;
+        if (!saveData || !saveData.pets || saveData.pets.length === 0) {
+            container.innerHTML = '<div class="text-slate-500 text-sm text-center py-4">保管中沒有任何寵物</div>';
+            return;
+        }
+
+        let html = '';
+        saveData.pets.forEach((p, index) => {
+            const petName = p.name || p.form || '未知寵物';
+            const lv = p.lv || 1;
+            const wpn = p.eq && p.eq.wpn ? `<span class="text-slate-300">+${p.eq.wpn.en || 0} ${p.eq.wpn.id}</span>` : '<span class="text-slate-600">無</span>';
+            const arm = p.eq && p.eq.arm ? `<span class="text-slate-300">+${p.eq.arm.en || 0} ${p.eq.arm.id}</span>` : '<span class="text-slate-600">無</span>';
+            
+            html += `
+                <div class="group relative flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-3 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 rounded-xl transition-all duration-200 shadow-md">
+                    <!-- Pet Info Section -->
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <!-- Icon -->
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg border border-emerald-900 bg-emerald-950/50 shadow-inner text-emerald-500 shrink-0">
+                            🐺
+                        </div>
+                        
+                        <!-- Text details -->
+                        <div class="flex flex-col min-w-0 justify-center">
+                            <div class="flex items-center gap-2 flex-wrap mb-0.5">
+                                <span class="font-bold text-emerald-400 text-sm tracking-wide truncate">Lv.${lv} ${petName}</span>
+                                <span class="text-[10px] text-red-400/80 font-mono bg-red-950/30 px-1.5 py-0.5 rounded border border-red-900/30">HP: ${p.hp || 0}/${p.mhp || 0}</span>
+                                <span class="text-[10px] text-blue-400/80 font-mono bg-blue-950/30 px-1.5 py-0.5 rounded border border-blue-900/30">MP: ${p.mp || 0}/${p.mmp || 0}</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                <span class="text-[11px] text-slate-400 bg-slate-950/40 px-1.5 py-0.5 rounded border border-slate-800 truncate">武: ${wpn}</span>
+                                <span class="text-[11px] text-slate-400 bg-slate-950/40 px-1.5 py-0.5 rounded border border-slate-800 truncate">防: ${arm}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
     function showStatus(message, type = 'info') {
         let container = document.getElementById('toast-container');
         if (!container) {
