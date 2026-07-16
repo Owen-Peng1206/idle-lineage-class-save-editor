@@ -2,10 +2,117 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=save-editor.html">
-    <title>正在前往存檔編輯器...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>放置天堂 - 工具與遊戲</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            background-color: #313244;
+            padding: 2rem 4rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            color: #f38ba8;
+        }
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        a {
+            text-decoration: none;
+            color: #11111b;
+            background-color: #89b4fa;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+            cursor: pointer;
+        }
+        a:hover {
+            background-color: #b4befe;
+            transform: scale(1.05);
+        }
+        #game-frame {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            margin: 0;
+            padding: 0;
+            background: #000;
+        }
+    </style>
 </head>
 <body>
-    <p>正在導向至存檔編輯器，如果沒有自動跳轉，請 <a href="save-editor.html">點擊這裡</a>。</p>
+    <div class="container" id="menu-container">
+        <h1>放置天堂 (Idle Lineage)</h1>
+        <div class="links">
+            <a onclick="launchGame()">進入遊戲 (Play Game)</a>
+            <a href="save-editor.html">存檔編輯器 (Save Editor)</a>
+        </div>
+    </div>
+    
+    <iframe id="game-frame"></iframe>
+
+    <script>
+        function launchGame() {
+            // 使用 fetch 取得遊戲原始碼，並在寫入 iframe 前注入遮蔽腳本
+            fetch('idle-lineage-class/index.html')
+                .then(response => response.text())
+                .then(html => {
+                    const bypassScript = `
+                        <base href="idle-lineage-class/">
+                        <script>
+                            (function() {
+                                try {
+                                    Object.defineProperty(window, '_origAuthCache', {
+                                        get: function() { return true; },
+                                        set: function() { /* 忽略所有寫入 */ },
+                                        configurable: false,
+                                        enumerable: false
+                                    });
+                                } catch(e) {
+                                    window._origAuthCache = true; // fallback
+                                }
+                            })();
+                        <\/script>
+                    `;
+                    // 將腳本與 base 標籤注入至 <head> 開頭
+                    const injectedHtml = html.replace('<head>', '<head>' + bypassScript);
+                    
+                    // 隱藏選單，顯示 iframe
+                    document.getElementById('menu-container').style.display = 'none';
+                    const frame = document.getElementById('game-frame');
+                    frame.style.display = 'block';
+                    
+                    // 寫入修改後的 HTML 到 iframe
+                    const doc = frame.contentWindow.document;
+                    doc.open();
+                    doc.write(injectedHtml);
+                    doc.close();
+                })
+                .catch(err => {
+                    alert('無法載入遊戲，請確認您是在網頁伺服器環境下執行 (例如 Live Server)，而非直接點擊檔案。');
+                    console.error(err);
+                });
+        }
+    </script>
 </body>
 </html>
