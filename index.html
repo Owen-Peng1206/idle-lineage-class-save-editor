@@ -64,21 +64,22 @@
     <div class="container" id="menu-container">
         <h1>放置天堂 (Idle Lineage)</h1>
         <div class="links">
-            <a onclick="launchGame()">進入遊戲 (Play Game)</a>
-            <a href="save-editor.html">存檔編輯器 (Save Editor)</a>
+            <a onclick="launchApp('idle-lineage-class/index.html', 'idle-lineage-class/')">進入遊戲 (Play Game)</a>
+            <a onclick="launchApp('save-editor.html', '')">存檔編輯器 (Save Editor)</a>
         </div>
     </div>
     
     <iframe id="game-frame"></iframe>
 
     <script>
-        function launchGame() {
-            // 使用 fetch 取得遊戲原始碼，並在寫入 iframe 前注入遮蔽腳本
-            fetch('idle-lineage-class/index.html')
+        function launchApp(url, baseHref) {
+            // 使用 fetch 取得網頁原始碼，並在寫入 iframe 前注入遮蔽腳本
+            fetch(url)
                 .then(response => response.text())
                 .then(html => {
+                    const baseTag = baseHref ? `<base href="${baseHref}">` : '';
                     const bypassScript = `
-                        <base href="idle-lineage-class/">
+                        ${baseTag}
                         <script>
                             (function() {
                                 try {
@@ -109,7 +110,7 @@
                     doc.close();
                 })
                 .catch(err => {
-                    alert('無法載入遊戲，請確認您是在網頁伺服器環境下執行 (例如 Live Server)，而非直接點擊檔案。');
+                    alert('無法載入內容，請確認您是在網頁伺服器環境下執行 (例如 Live Server)，而非直接點擊檔案。');
                     console.error(err);
                 });
         }
