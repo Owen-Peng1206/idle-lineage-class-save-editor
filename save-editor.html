@@ -147,10 +147,10 @@
         .c-sherine { color: #4ade80 !important; font-weight: bold; text-shadow: 0 0 5px rgba(74, 222, 128, 0.4); }
         .c-cursed { color: #ef4444; text-shadow: 0 0 5px rgba(239,68,68,0.4); }
         
-        .c-attr-fire1  { color: #fca5a5; } .c-attr-fire3  { color: #f87171; } .c-attr-fire5  { color: #ef4444; }
-        .c-attr-water1 { color: #93c5fd; } .c-attr-water3 { color: #60a5fa; } .c-attr-water5 { color: #3b82f6; }
-        .c-attr-wind1  { color: #86efac; } .c-attr-wind3  { color: #4ade80; } .c-attr-wind5  { color: #22c55e; }
-        .c-attr-earth1 { color: #fcd34d; } .c-attr-earth3 { color: #fbbf24; } .c-attr-earth5 { color: #f59e0b; }
+        .c-attr-fr1, .c-attr-fr2 { color: #fca5a5; } .c-attr-fr3, .c-attr-fr4 { color: #f87171; } .c-attr-fr5 { color: #ef4444; }
+        .c-attr-wa1, .c-attr-wa2 { color: #93c5fd; } .c-attr-wa3, .c-attr-wa4 { color: #60a5fa; } .c-attr-wa5 { color: #3b82f6; }
+        .c-attr-wi1, .c-attr-wi2 { color: #86efac; } .c-attr-wi3, .c-attr-wi4 { color: #4ade80; } .c-attr-wi5 { color: #22c55e; }
+        .c-attr-ea1, .c-attr-ea2 { color: #fcd34d; } .c-attr-ea3, .c-attr-ea4 { color: #fbbf24; } .c-attr-ea5 { color: #f59e0b; }
         .c-attr-glow { text-shadow: 0 0 6px currentColor; }
 
         @keyframes modalSlideUp {
@@ -610,7 +610,11 @@
             <div class="card space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-2">
                     <h2 class="text-lg font-bold font-serif text-yellow-500">個人/共用倉庫 (Warehouse)</h2>
-                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end flex-wrap">
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-400 text-xs shrink-0">龍之鑽石:</span>
+                            <input id="edit-pandora-diamonds" type="number" min="0" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sky-300 text-xs text-center font-bold font-mono focus:outline-none" onchange="updatePandoraDiamonds(this.value)">
+                        </div>
                         <div class="flex items-center gap-2">
                             <span class="text-slate-400 text-xs shrink-0">倉庫金幣:</span>
                             <input id="edit-wh-gold" type="number" min="0" class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-yellow-400 text-xs text-center font-bold font-mono focus:outline-none" onchange="updateWarehouseGold(this.value)">
@@ -834,18 +838,70 @@
                         <label class="block text-xs text-slate-400 mb-1">屬性詞綴 (Attribute):</label>
                         <select id="edit-item-attr" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none">
                             <option value="">無</option>
-                            <option value="fire1">火之 (+1)</option>
-                            <option value="water1">水之 (+1)</option>
-                            <option value="wind1">風之 (+1)</option>
-                            <option value="earth1">地之 (+1)</option>
-                            <option value="fire3">爆炎 (+3)</option>
-                            <option value="water3">海嘯 (+3)</option>
-                            <option value="wind3">暴風 (+3)</option>
-                            <option value="earth3">崩裂 (+3)</option>
-                            <option value="fire5">火靈 (+5)</option>
-                            <option value="water5">水靈 (+5)</option>
-                            <option value="wind5">風靈 (+5)</option>
-                            <option value="earth5">地靈 (+5)</option>
+                            <option value="fr1">火之 (1階)</option>
+                            <option value="fr2">爆炎 (2階)</option>
+                            <option value="fr3">火靈 (3階)</option>
+                            <option value="fr4">赤炎 (4階)</option>
+                            <option value="fr5">帕格里奧 (5階)</option>
+                            <option value="wa1">水之 (1階)</option>
+                            <option value="wa2">海嘯 (2階)</option>
+                            <option value="wa3">水靈 (3階)</option>
+                            <option value="wa4">霜凍 (4階)</option>
+                            <option value="wa5">伊娃 (5階)</option>
+                            <option value="wi1">風之 (1階)</option>
+                            <option value="wi2">暴風 (2階)</option>
+                            <option value="wi3">風靈 (3階)</option>
+                            <option value="wi4">蒼蘭 (4階)</option>
+                            <option value="wi5">沙哈 (5階)</option>
+                            <option value="ea1">地之 (1階)</option>
+                            <option value="ea2">崩裂 (2階)</option>
+                            <option value="ea3">地靈 (3階)</option>
+                            <option value="ea4">輝岩 (4階)</option>
+                            <option value="ea5">馬普勒 (5階)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">屬性附加魔法 (Attr Magic):</label>
+                        <select id="edit-item-attrmagic" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none" onchange="updateAttrForMagic(this.value)">
+                            <option value="">無</option>
+                            <optgroup label="火屬性">
+                                <option value="sk_meteor">流星雨 (Meteor)</option>
+                                <option value="sk_fire_storm">火牢 (Fire Storm)</option>
+                                <option value="sk_blaze">烈炎術 (Blaze)</option>
+                                <option value="sk_fireball">火球術 (Fireball)</option>
+                                <option value="sk_firearrow">火箭 (Firearrow)</option>
+                            </optgroup>
+                            <optgroup label="水屬性">
+                                <option value="sk_blizzard">冰雪暴 (Blizzard)</option>
+                                <option value="sk_ice_lance">冰矛圍籬 (Ice Lance)</option>
+                                <option value="sk_chill">極寒裂痕 (Chill)</option>
+                                <option value="sk_icearrow">冰箭 (Icearrow)</option>
+                                <option value="sk_poison_curse">毒咒 (Poison Curse)</option>
+                            </optgroup>
+                            <optgroup label="風屬性">
+                                <option value="sk_thunder_storm">雷霆風暴 (Thunder Storm)</option>
+                                <option value="sk_tornado">龍捲風 (Tornado)</option>
+                                <option value="sk_thunder">極光雷電 (Thunder)</option>
+                                <option value="sk_windblade">風之神射 (Windblade)</option>
+                                <option value="sk_holy_dash">神聖衝刺 (Holy Dash)</option>
+                            </optgroup>
+                            <optgroup label="地屬性">
+                                <option value="sk_quake">地裂術 (Quake)</option>
+                                <option value="sk_earthquake">地震 (Earthquake)</option>
+                                <option value="sk_rock_prison">木乃伊的詛咒 (Rock Prison)</option>
+                                <option value="sk_hell_fang">地獄之牙 (Hell Fang)</option>
+                                <option value="sk_slow">緩速術 (Slow)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">附加魔法星等 (Magic Star):</label>
+                        <select id="edit-item-attrmagic-star" class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-white text-xs cursor-pointer focus:outline-none">
+                            <option value="1">1星 (1★)</option>
+                            <option value="2">2星 (2★)</option>
+                            <option value="3">3星 (3★)</option>
                         </select>
                     </div>
 
@@ -1239,9 +1295,10 @@
     function blessColorClass(bless) { return (bless === 'cursed') ? 'c-cursed' : 'c-blessed'; }
     
     const ATTR_AFFIX_LOCAL = {
-        fire1:  { n: '火之' }, water1: { n: '水之' }, wind1:  { n: '風之' }, earth1: { n: '地之' },
-        fire3:  { n: '爆炎' }, water3: { n: '海嘯' }, wind3:  { n: '暴風' }, earth3: { n: '崩裂' },
-        fire5:  { n: '火靈' }, water5: { n: '水靈' }, wind5:  { n: '風靈' }, earth5: { n: '地靈' }
+        fr1: { n: '火之' }, fr2: { n: '爆炎' }, fr3: { n: '火靈' }, fr4: { n: '赤炎' }, fr5: { n: '帕格里奧' },
+        wa1: { n: '水之' }, wa2: { n: '海嘯' }, wa3: { n: '水靈' }, wa4: { n: '霜凍' }, wa5: { n: '伊娃' },
+        wi1: { n: '風之' }, wi2: { n: '暴風' }, wi3: { n: '風靈' }, wi4: { n: '蒼蘭' }, wi5: { n: '沙哈' },
+        ea1: { n: '地之' }, ea2: { n: '崩裂' }, ea3: { n: '地靈' }, ea4: { n: '輝岩' }, ea5: { n: '馬普勒' }
     };
     
     function getItemColorLocal(item) {
@@ -1997,6 +2054,16 @@
             if (aff) details.push(aff.n);
         }
         if (item.seteff) details.push(`席琳[${item.seteff}]`);
+        if (item.attrMagic) {
+            const stars = '★'.repeat(item.attrMagicStar || 1);
+            let magicName = item.attrMagic;
+            if (typeof DB !== 'undefined' && DB.skills && DB.skills[item.attrMagic]) {
+                magicName = DB.skills[item.attrMagic].n;
+            } else {
+                magicName = magicName.replace('sk_', '');
+            }
+            details.push(`${stars}${magicName}`);
+        }
         const detailsStr = details.length > 0 ? details.join(', ') : '無';
 
         const editAction = type === 'inv' ? `showEditItemModal('edit_inv', ${i})` : `showEditItemModal('edit_wh', ${i})`;
@@ -2075,15 +2142,24 @@
         showStatus('已更新倉庫金幣', 'success');
     }
 
+    function updatePandoraDiamonds(value) {
+        if (!saveData) return;
+        saveData.pandoraDiamonds = Math.max(0, parseInt(value) || 0);
+        showStatus('已更新龍之鑽石', 'success');
+    }
+
     function renderWarehouse() {
         const container = document.getElementById('warehouse-table');
         const goldInput = document.getElementById('edit-wh-gold');
+        const diaInput = document.getElementById('edit-pandora-diamonds');
         if (!container || !goldInput) return;
 
         if (!saveData) return;
         if (!saveData.wh) saveData.wh = { items: [], gold: 0 };
+        if (saveData.pandoraDiamonds === undefined) saveData.pandoraDiamonds = 0;
         
         goldInput.value = saveData.wh.gold || 0;
+        if (diaInput) diaInput.value = saveData.pandoraDiamonds || 0;
         container.innerHTML = '';
 
         const whItems = saveData.wh.items || [];
@@ -2245,6 +2321,8 @@
         document.getElementById('edit-item-anc').value = '';
         document.getElementById('edit-item-attr').value = '';
         document.getElementById('edit-item-seteff').value = '';
+        document.getElementById('edit-item-attrmagic').value = '';
+        document.getElementById('edit-item-attrmagic-star').value = '1';
 
         const titleEl = document.getElementById('modal-title');
 
@@ -2295,13 +2373,39 @@
             document.getElementById('edit-item-anc').value = '';
         }
 
-        document.getElementById('edit-item-attr').value = item.attr || '';
+        const LEGACY_MAP = {
+            fire1: 'fr1', fire3: 'fr2', fire5: 'fr3', water1: 'wa1', water3: 'wa2', water5: 'wa3',
+            wind1: 'wi1', wind3: 'wi2', wind5: 'wi3', earth1: 'ea1', earth3: 'ea2', earth5: 'ea3',
+        };
+        let attrVal = item.attr || '';
+        if (LEGACY_MAP[attrVal]) attrVal = LEGACY_MAP[attrVal];
+        
+        document.getElementById('edit-item-attr').value = attrVal;
         document.getElementById('edit-item-seteff').value = item.seteff || '';
+        document.getElementById('edit-item-attrmagic').value = item.attrMagic || '';
+        document.getElementById('edit-item-attrmagic-star').value = item.attrMagicStar || 1;
     }
 
     function closeItemEditorModal() {
         document.getElementById('item-editor-modal').classList.add('hidden');
         editingContext = null;
+    }
+
+    function updateAttrForMagic(magicVal) {
+        if (!magicVal) return;
+        const attrSelect = document.getElementById('edit-item-attr');
+        if (!attrSelect) return;
+        
+        let targetEle = '';
+        if (['sk_meteor', 'sk_fire_storm', 'sk_blaze', 'sk_fireball', 'sk_firearrow'].includes(magicVal)) targetEle = 'fr5';
+        else if (['sk_blizzard', 'sk_ice_lance', 'sk_chill', 'sk_icearrow', 'sk_poison_curse'].includes(magicVal)) targetEle = 'wa5';
+        else if (['sk_thunder_storm', 'sk_tornado', 'sk_thunder', 'sk_windblade', 'sk_holy_dash'].includes(magicVal)) targetEle = 'wi5';
+        else if (['sk_quake', 'sk_earthquake', 'sk_rock_prison', 'sk_hell_fang', 'sk_slow'].includes(magicVal)) targetEle = 'ea5';
+        
+        if (targetEle) {
+            attrSelect.value = targetEle;
+            showStatus('已自動將屬性詞綴設為對應屬性(5階)，這是附加魔法生效的必要條件。', 'info');
+        }
     }
 
     function confirmSaveItem() {
@@ -2325,6 +2429,9 @@
         
         const seteffVal = document.getElementById('edit-item-seteff').value;
         const seteff = seteffVal ? seteffVal : undefined;
+        
+        const attrMagicVal = document.getElementById('edit-item-attrmagic').value;
+        const attrMagicStarVal = parseInt(document.getElementById('edit-item-attrmagic-star').value) || 1;
 
         if (!itemId) {
             showStatus('請輸入物品 ID', 'warning');
@@ -2338,6 +2445,16 @@
         if (anc !== undefined) item.anc = anc;
         if (attr !== undefined) item.attr = attr;
         if (seteff !== undefined) item.seteff = seteff;
+        if (attrMagicVal) {
+            item.attrMagic = attrMagicVal;
+            item.attrMagicStar = attrMagicStarVal;
+            
+            // 強制附加魔法必須要有對應的 5 階屬性才能生效
+            if (['sk_meteor', 'sk_fire_storm', 'sk_blaze', 'sk_fireball', 'sk_firearrow'].includes(attrMagicVal)) item.attr = 'fr5';
+            else if (['sk_blizzard', 'sk_ice_lance', 'sk_chill', 'sk_icearrow', 'sk_poison_curse'].includes(attrMagicVal)) item.attr = 'wa5';
+            else if (['sk_thunder_storm', 'sk_tornado', 'sk_thunder', 'sk_windblade', 'sk_holy_dash'].includes(attrMagicVal)) item.attr = 'wi5';
+            else if (['sk_quake', 'sk_earthquake', 'sk_rock_prison', 'sk_hell_fang', 'sk_slow'].includes(attrMagicVal)) item.attr = 'ea5';
+        }
 
         if (editingContext.type === 'add_inv') {
             item.uid = genUid();
@@ -2777,6 +2894,7 @@
                 }
                 keys.push('lineage_idle_warehouse','lineage_idle_warehouse_classic','lineage_idle_warehouse_trad','lineage_idle_warehouse_tradonly');
                 keys.push('fb5_pet_roster','fb5_pet_roster_classic','fb5_pet_roster_trad','fb5_pet_roster_tradonly');
+                keys.push('fb5_pandora_relic_market_v1');
                 var saves = {};
                 keys.forEach(function(k) {
                     var v = localStorage.getItem(k);
@@ -3066,6 +3184,27 @@
                 if (!combinedData.pets) combinedData.pets = [];
             }
             
+            if (data.pandoraDiamonds !== undefined) {
+                combinedData.pandoraDiamonds = data.pandoraDiamonds;
+            } else {
+                let pKey = 'fb5_pandora_relic_market_v1';
+                try {
+                    let pRaw = isOpener ? openerSaves[pKey] : localStorage.getItem(pKey);
+                    if (pRaw) {
+                        if (pRaw.startsWith('LZ1:')) {
+                            pRaw = LZString.decompressFromUTF16(pRaw.slice(4));
+                        }
+                        let pData = JSON.parse(pRaw);
+                        if (pData && pData.diamonds !== undefined) {
+                            combinedData.pandoraDiamonds = pData.diamonds;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to load pandora diamonds:', e);
+                }
+                if (combinedData.pandoraDiamonds === undefined) combinedData.pandoraDiamonds = 0;
+            }
+            
             const ensureUids = (item) => {
                 if (item && !item.uid) {
                     item.uid = genUid();
@@ -3262,6 +3401,30 @@
                         key: petKey,
                         value: petCompressed
                     }, '*');
+                }
+
+                if (saveData.pandoraDiamonds !== undefined) {
+                    let pKey = 'fb5_pandora_relic_market_v1';
+                    try {
+                        let pRaw = isOpener ? openerSaves[pKey] : localStorage.getItem(pKey);
+                        let pData = {};
+                        if (pRaw) {
+                            if (pRaw.startsWith('LZ1:')) {
+                                pRaw = LZString.decompressFromUTF16(pRaw.slice(4));
+                            }
+                            pData = JSON.parse(pRaw) || {};
+                        }
+                        pData.diamonds = saveData.pandoraDiamonds;
+                        let pPayloadStr = JSON.stringify(pData);
+                        let pCompressed = 'LZ1:' + LZString.compressToUTF16(pPayloadStr);
+                        gameWindowReference.postMessage({
+                            action: 'setSave',
+                            key: pKey,
+                            value: pCompressed
+                        }, '*');
+                    } catch (e) {
+                        console.warn('Failed to save pandora diamonds to game:', e);
+                    }
                 }
             }
         } catch (e) {
